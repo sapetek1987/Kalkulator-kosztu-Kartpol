@@ -1,64 +1,3 @@
-Biblioteka
-/
-index_kombinacje_5.html
-inde…5.html
-
-Udostępnij
-Więcej działań
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
 <!doctype html>
 <html lang="pl">
 <head>
@@ -113,5 +52,266 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
 <button onclick="showTab('box',this)">Karton — powierzchnia i waga</button>
 <button onclick="showTab('history',this)">Historia</button>
 </nav>
-    window.dispatchEvent(new CustomEvent("kkParamsChanged"));
+<main>
+
+<section class="card" id="params-card">
+  <div class="section-head">
+    <div>
+      <h2>Parametry maszyn</h2>
+      <p class="muted">Edytuj parametry używane przez kalkulator. Zmiany są zapisywane lokalnie w przeglądarce.</p>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn secondary" id="resetParams">Przywróć z Excela</button>
+      <button type="button" class="btn" id="saveParams">Zapisz parametry</button>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table class="data-table" id="machineParamsTable">
+      <thead>
+        <tr>
+          <th>Maszyna</th>
+          <th>Wsp. ilości</th>
+          <th>Stała czasu</th>
+          <th>Pracownicy</th>
+          <th>Energia / wzór</th>
+          <th>Koszt roboczogodziny</th>
+        </tr>
+      </thead>
+      <tbody id="machineParamsBody"></tbody>
+    </table>
+  </div>
+  <div class="note" id="paramsStatus"></div>
+</section>
+
+
+<section id="calc" class="tab active">
+<div class="grid">
+<div class="card">
+<h2>1. Zlecenie</h2>
+<div class="row">
+<div class="field"><label>Klient</label><input id="client" placeholder="np. K-182"></div>
+<div class="field"><label>Ilość [szt.]</label><input id="qty" type="number" value="30000" min="1"></div>
+</div>
+<div class="row">
+<div class="field"><label>Użytki</label><input id="uses" type="number" value="1" min="1"></div>
+<div class="field"><label>Koszt roboczogodziny [zł]</label><input id="hourCost" type="number" value="40" step=".01"></div>
+</div>
+
+<h2 style="margin-top:18px">2. Wybierz ciąg produkcyjny</h2>
+<div class="checkgrid" id="machineChecks"></div>
+<div class="note">Możesz łączyć maszyny w dowolnej kolejności. Kalkulator liczy każdy etap osobno i podaje sumę.</div>
+<div class="actions"><button class="primary" onclick="calculate()">Przelicz</button><button class="secondary" onclick="saveResult()">Zapisz kalkulację</button></div>
+</div>
+
+<div class="card">
+<h2>Wynik ciągu produkcyjnego</h2>
+<div class="metrics">
+<div class="metric"><small>Łączny czas</small><b id="totTime">0,00 h</b></div>
+<div class="metric"><small>Wybrane etapy</small><b id="stageCount">0</b></div>
+<div class="metric"><small>Koszt robocizny</small><b id="labor">0,00 zł</b></div>
+<div class="metric"><small>Koszt energii</small><b id="energy">0,00 zł</b></div>
+<div class="metric total"><small>Koszt całkowity</small><b id="total">0,00 zł</b></div>
+<div class="metric total"><small>Koszt / szt.</small><b id="unit">0,00 zł</b></div>
+</div>
+<h2 style="margin-top:18px">Etapy</h2><div id="stageTable"></div>
+</div>
+</div>
+</section>
+
+<section id="compare" class="tab">
+<div class="card">
+<h2>Porównanie różnych modeli / kombinacji</h2>
+<div class="tabs2" id="presetBtns"></div>
+<div id="comparison"></div>
+</div>
+</section>
+
+<section id="box" class="tab">
+<div class="grid">
+<div class="card"><h2>Specyfikacja opakowania</h2>
+<div class="field"><label>Gramatura [g/m²]</label><input id="gsm" type="number" value="445" step=".1"></div>
+<div class="row"><div class="field"><label>L [m]</label><input id="bl" type="number" value=".40" step=".001"></div><div class="field"><label>W [m]</label><input id="bw" type="number" value=".22" step=".001"></div></div>
+<div class="field"><label>H [m]</label><input id="bh" type="number" value=".14" step=".001"></div>
+<button class="primary" onclick="boxCalc()">Oblicz</button></div>
+<div class="card"><h2>Wynik</h2><div class="metrics">
+<div class="metric total"><small>Powierzchnia pudła</small><b id="boxArea">0,0000 m²</b></div>
+<div class="metric total"><small>Waga pudła</small><b id="boxWeight">0,000 kg</b></div>
+</div><div class="note">Wzór powierzchni został odwzorowany z arkusza: 2×(L×W + W×H + L×H). Waga = powierzchnia × gramatura / 1000.</div></div>
+</div>
+</section>
+
+<section id="history" class="tab"><div class="card"><h2>Historia kalkulacji</h2><div id="hist"></div></div></section>
+</main>
+
+<script>
+const CFG={"machines": [{"id": "sztanca", "name": "Sztanca", "time": "=IMDIV(H3,I3)/1500+1", "workers": 3, "energy": "=(H6-1)*60", "cost": "=(H6*40)*H7+H8"}, {"id": "chinczyk", "name": "Chińczyk", "time": "=IMDIV(H3,I3)/1500+1", "workers": 3, "energy": "=(I6-1)*60", "cost": "=(I6*40)*I7+I8"}, {"id": "wielopunkt", "name": "Sklejarka wielopunkt", "time": "=H3/5000+1.8", "workers": 5, "energy": "=(J6-1.8)*60", "cost": "=(J6*40)*J7+J8"}, {"id": "jednopunkt", "name": "Sklejarka jednopunkt", "time": "=H3/700+1", "workers": 3, "energy": "=(K6-1)*60", "cost": "=(K6*40)*K7+K8"}, {"id": "emba", "name": "EMBA", "time": "=H3/1200+1", "workers": 4, "energy": "=(L6-1)*60", "cost": "=(L6*40)*L7+L8"}, {"id": "krajarka", "name": "Krajarka", "time": "=H3/3000+0.3", "workers": 2, "energy": "=(M6-0.5)*55", "cost": "=(M6*40)*M7+M8"}], "combinations": [{"name": "Chińczyk + Sztanca + Sklejarka wielopunkt", "items": ["chinczyk", "sztanca", "wielopunkt"]}, {"name": "Sztanca + Sklejarka wielopunkt", "items": ["sztanca", "wielopunkt"]}, {"name": "Chińczyk + EMBA", "items": ["chinczyk", "emba"]}, {"name": "EMBA", "items": ["emba"]}, {"name": "Chińczyk + Sklejarka jednopunktowa", "items": ["chinczyk", "jednopunkt"]}]};
+const M=Object.fromEntries(CFG.machines.map(x=>[x.id,x]));
+const selected=new Set(["sztanca","chinczyk","wielopunkt"]);
+
+function money(x){return x.toLocaleString('pl-PL',{minimumFractionDigits:2,maximumFractionDigits:2})+" zł"}
+function num(id){return parseFloat(document.getElementById(id).value)||0}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function showTab(id,b){document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');if(id==='compare')renderCompare();if(id==='history')renderHistory()}
+function initChecks(){
+ const box=document.getElementById('machineChecks');
+ box.innerHTML=CFG.machines.map(m=>`<label class="check"><input type="checkbox" data-id="${m.id}" ${selected.has(m.id)?'checked':''}>${m.name}</label>`).join('');
+ box.querySelectorAll('input').forEach(x=>x.addEventListener('change',()=>{x.checked?selected.add(x.dataset.id):selected.delete(x.dataset.id);calculate()}));
+}
+function stageResult(m){
+ const qty=num('qty'), uses=Math.max(1,num('uses')), hourCost=num('hourCost');
+ let time;
+ if(m.id==='sztanca'||m.id==='chinczyk') time=qty/uses/1500+1;
+ if(m.id==='wielopunkt') time=qty/5000+1.8;
+ if(m.id==='jednopunkt') time=qty/700+1;
+ if(m.id==='emba') time=qty/1200+1;
+ if(m.id==='krajarka') time=qty/3000+.3;
+ let energy;
+ if(m.id==='sztanca'||m.id==='chinczyk') energy=(time-1)*60;
+ if(m.id==='wielopunkt') energy=(time-1.8)*60;
+ if(m.id==='jednopunkt') energy=(time-1)*60;
+ if(m.id==='emba') energy=(time-1)*60;
+ if(m.id==='krajarka') energy=(time-.5)*55;
+ const labor=time*hourCost*m.workers;
+ return {time,energy,labor,total:labor+energy,unit:(labor+energy)/Math.max(1,qty)};
+}
+function calculate(){
+ let rows=[...selected].map(id=>({m:M[id],r:stageResult(M[id])}));
+ let t=rows.reduce((a,x)=>a+x.r.time,0), l=rows.reduce((a,x)=>a+x.r.labor,0), e=rows.reduce((a,x)=>a+x.r.energy,0), total=l+e, qty=num('qty');
+ document.getElementById('totTime').textContent=t.toFixed(2).replace('.',',')+' h';
+ document.getElementById('stageCount').textContent=rows.length;
+ document.getElementById('labor').textContent=money(l);document.getElementById('energy').textContent=money(e);
+ document.getElementById('total').textContent=money(total);document.getElementById('unit').textContent=money(total/Math.max(1,qty));
+ document.getElementById('stageTable').innerHTML='<table><tr><th>Etap</th><th>Czas</th><th>Pracownicy</th><th>Energia</th><th>Koszt</th><th>/ szt.</th></tr>'+
+ rows.map(x=>`<tr><td><b>${x.m.name}</b></td><td>${x.r.time.toFixed(2)} h</td><td>${x.m.workers}</td><td>${money(x.r.energy)}</td><td>${money(x.r.total)}</td><td>${money(x.r.unit)}</td></tr>`).join('')+'</table>';
+ return {time:t,labor:l,energy:e,total,unit:total/Math.max(1,qty),rows};
+}
+function preset(ids){
+ selected.clear();ids.forEach(id=>selected.add(id));initChecks();calculate();
+}
+function renderCompare(){
+ const qty=num('qty');
+ const presets=CFG.combinations.map((p,i)=>`<button onclick="preset(${JSON.stringify(p.items)})">${p.name}</button>`).join('');
+ document.getElementById('presetBtns').innerHTML=presets+'<button onclick="selected.clear();initChecks();calculate()">Wyczyść wybór</button>';
+ const rows=CFG.combinations.map(p=>{
+   const rr=p.items.map(id=>stageResult(M[id]));
+   const total=rr.reduce((a,x)=>a+x.total,0), time=rr.reduce((a,x)=>a+x.time,0);
+   return {name:p.name,time,total,unit:total/Math.max(1,qty),count:p.items.length};
+ }).sort((a,b)=>a.unit-b.unit);
+ document.getElementById('comparison').innerHTML='<table><tr><th>Kombinacja</th><th>Etapy</th><th>Czas</th><th>Koszt</th><th>Koszt / szt.</th><th></th></tr>'+
+ rows.map(x=>`<tr><td><b>${x.name}</b></td><td>${x.count}</td><td>${x.time.toFixed(2)} h</td><td>${money(x.total)}</td><td>${money(x.unit)}</td><td><button class="secondary" onclick="presetByName('${x.name.replace(/'/g,"\\'")}')">Wybierz</button></td></tr>`).join('')+'</table>';
+}
+function presetByName(name){const p=CFG.combinations.find(x=>x.name===name);if(p)preset(p.items);document.querySelector('nav button').click()}
+function boxCalc(){const L=num('bl'),W=num('bw'),H=num('bh'),gsm=num('gsm');const area=2*(L*W+W*H+L*H),weight=area*gsm/1000;document.getElementById('boxArea').textContent=area.toFixed(4).replace('.',',')+' m²';document.getElementById('boxWeight').textContent=weight.toFixed(3).replace('.',',')+' kg'}
+function saveResult(){const r=calculate(),h=JSON.parse(localStorage.getItem('koszty_kartpol_history')||'[]');h.unshift({date:new Date().toLocaleString('pl-PL'),client:document.getElementById('client').value||'—',qty:num('qty'),machines:[...selected].map(id=>M[id].name),cost:r.total,unit:r.unit});localStorage.setItem('koszty_kartpol_history',JSON.stringify(h.slice(0,100)));alert('Kalkulacja została zapisana.')}
+function renderHistory(){const h=JSON.parse(localStorage.getItem('koszty_kartpol_history')||'[]');document.getElementById('hist').innerHTML=h.length?'<table><tr><th>Data</th><th>Klient</th><th>Ilość</th><th>Ciąg</th><th>Koszt</th><th>/ szt.</th></tr>'+h.map(x=>`<tr><td>${x.date}</td><td>${esc(x.client)}</td><td>${x.qty.toLocaleString('pl-PL')}</td><td>${x.machines.map(esc).join(' → ')}</td><td>${money(x.cost)}</td><td>${money(x.unit)}</td></tr>`).join('')+'</table>':'<p style="color:#667085">Brak zapisanych kalkulacji.</p>'}
+initChecks();calculate();boxCalc();renderHistory();
 </script>
+
+<script>
+(function(){
+  const DEFAULT_PARAMS = {
+    "Sztanca": {divisor:1500, offset:1, workers:3, energyBase:1, energyRate:60, hourCost:40},
+    "Chińczyk": {divisor:1500, offset:1, workers:3, energyBase:1, energyRate:60, hourCost:40},
+    "Sklejarka wielopunkt": {divisor:5000, offset:1.8, workers:5, energyBase:1.8, energyRate:60, hourCost:40},
+    "Sklejarka jednopunkt": {divisor:700, offset:1, workers:3, energyBase:1, energyRate:60, hourCost:40},
+    "EMBA": {divisor:1200, offset:1, workers:4, energyBase:1, energyRate:60, hourCost:40},
+    "Krajarka": {divisor:3000, offset:0.3, workers:2, energyBase:0.5, energyRate:55, hourCost:40}
+  };
+
+  function loadMachineParams(){
+    try{
+      const saved = JSON.parse(localStorage.getItem("kosztyKartpolMachineParams") || "null");
+      if(saved) return {...DEFAULT_PARAMS, ...saved};
+    }catch(e){}
+    return JSON.parse(JSON.stringify(DEFAULT_PARAMS));
+  }
+
+  window.KK_MACHINE_PARAMS = loadMachineParams();
+
+  function esc(v){
+    return String(v ?? "").replace(/[&<>"']/g, c => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[c]));
+  }
+
+  function renderParams(){
+    const body = document.getElementById("machineParamsBody");
+    if(!body) return;
+    body.innerHTML = Object.entries(window.KK_MACHINE_PARAMS).map(([name,p]) => `
+      <tr data-machine="${esc(name)}">
+        <td><strong>${esc(name)}</strong></td>
+        <td><input type="number" step="0.01" min="0.01" data-k="divisor" value="${p.divisor}"></td>
+        <td><input type="number" step="0.01" data-k="offset" value="${p.offset}"></td>
+        <td><input type="number" step="1" min="0" data-k="workers" value="${p.workers}"></td>
+        <td>
+          <div class="formula-box">
+            czas: ilość / współczynnik + stała<br>
+            energia: (czas − baza) × stawka
+          </div>
+          <div class="energy-grid">
+            <label>baza <input type="number" step="0.01" data-k="energyBase" value="${p.energyBase}"></label>
+            <label>stawka <input type="number" step="0.01" min="0" data-k="energyRate" value="${p.energyRate}"></label>
+          </div>
+        </td>
+        <td><input type="number" step="0.01" min="0" data-k="hourCost" value="${p.hourCost}"></td>
+      </tr>
+    `).join("");
+  }
+
+  function readParams(){
+    document.querySelectorAll("#machineParamsBody tr").forEach(row => {
+      const name = row.dataset.machine;
+      if(!window.KK_MACHINE_PARAMS[name]) return;
+      row.querySelectorAll("input[data-k]").forEach(input => {
+        const key = input.dataset.k;
+        const value = Number(input.value);
+        if(Number.isFinite(value)) window.KK_MACHINE_PARAMS[name][key] = value;
+      });
+    });
+  }
+
+  function saveParams(show=true){
+    readParams();
+    localStorage.setItem("kosztyKartpolMachineParams", JSON.stringify(window.KK_MACHINE_PARAMS));
+    window.dispatchEvent(new CustomEvent("kkParamsChanged"));
+    const s = document.getElementById("paramsStatus");
+    if(s && show) s.textContent = "Parametry zapisane. Kalkulator będzie używał nowych wartości.";
+  }
+
+  function resetParams(){
+    window.KK_MACHINE_PARAMS = JSON.parse(JSON.stringify(DEFAULT_PARAMS));
+    localStorage.removeItem("kosztyKartpolMachineParams");
+    renderParams();
+    window.dispatchEvent(new CustomEvent("kkParamsChanged"));
+    const s = document.getElementById("paramsStatus");
+    if(s) s.textContent = "Przywrócono parametry z arkusza Excel.";
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    renderParams();
+    document.getElementById("saveParams")?.addEventListener("click", () => saveParams(true));
+    document.getElementById("resetParams")?.addEventListener("click", resetParams);
+  });
+
+  window.KK_DEFAULT_MACHINE_PARAMS = DEFAULT_PARAMS;
+  window.KK_SAVE_PARAMS = saveParams;
+})();
+</script>
+
+
+<script>
+(function(){
+  // Expose a single function for the existing calculator:
+  // get machine parameters from the editable table/localStorage.
+  window.getKKMachineParams = function(name){
+    return window.KK_MACHINE_PARAMS?.[name] || window.KK_DEFAULT_MACHINE_PARAMS?.[name];
+  };
+})();
+</script>
+
+
+
+
+
+</body>
+</html>
