@@ -207,7 +207,7 @@ function calculate(){
  document.getElementById('energy').textContent=money(e);
  document.getElementById('total').textContent=money(total);
  document.getElementById('unit').textContent=money(total/Math.max(1,qty));
- document.getElementById('stageTable').innerHTML='<table><tr><th>Etap</th><th>Czas</th><th>Pracownicy</th><th>Energia</th><th>Ludzie</th><th>Koszt</th><th>/ szt.</th></tr>'+\
+ document.getElementById('stageTable').innerHTML='<table><tr><th>Etap</th><th>Czas</th><th>Pracownicy</th><th>Energia</th><th>Ludzie</th><th>Koszt</th><th>/ szt.</th></tr>'+
  rows.map(x=>`<tr><td><b>${x.m.name}</b></td><td>${x.r.time.toFixed(2)} h</td><td>${x.r.workers}</td><td>${money(x.r.energy)}</td><td>${money(x.r.labor)}</td><td>${money(x.r.total)}</td><td>${money(x.r.unit)}</td></tr>`).join('')+'</table>';
  return {time:t,labor:l,energy:e,total,unit:total/Math.max(1,qty),rows};
 }
@@ -333,7 +333,21 @@ function renderHistory(){
   const h=JSON.parse(localStorage.getItem('koszty_kartpol_history')||'[]');
   document.getElementById('hist').innerHTML=h.length?'<table><tr><th>Data</th><th>Klient</th><th>Ilość</th><th>Ciąg</th><th>Koszt</th><th>/ szt.</th><th>Akcja</th></tr>'+h.map((x,i)=>`<tr><td>${esc(x.date)}</td><td>${esc(x.client)}</td><td>${Number(x.qty||0).toLocaleString('pl-PL')}</td><td>${x.machines.map(esc).join(' → ')}</td><td>${money(x.cost)}</td><td>${money(x.unit)}</td><td><button class="secondary" type="button" onclick="printHistory('${x.id||i}')">🖨️ Drukuj</button></td></tr>`).join('')+'</table>':'<p style="color:#667085">Brak zapisanych kalkulacji.</p>'}
 
-initChecks();calculate();boxCalc();renderHistory();
+function bindLiveCalculationInputs(){
+  ["qty","uses","hourCost"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){
+      el.addEventListener("input",()=>calculate());
+      el.addEventListener("change",()=>calculate());
+    }
+  });
+}
+
+initChecks();
+bindLiveCalculationInputs();
+calculate();
+boxCalc();
+renderHistory();
 </script>
 
 <script>
@@ -423,16 +437,14 @@ initChecks();calculate();boxCalc();renderHistory();
     if(s) s.textContent = "Przywrócono parametry z arkusza Excel.";
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
-    renderParams();
-    document.getElementById("saveParams")?.addEventListener("click", () => saveParams(true));
-    document.getElementById("resetParams")?.addEventListener("click", resetParams);
-    document.addEventListener("input", e => {
-      if(e.target.closest("#machineParamsBody")){
-        clearTimeout(window.__kkParamTimer);
-        window.__kkParamTimer=setTimeout(()=>{ saveParams(false); calculate(); renderCompare(); },120);
-      }
-    });
+  renderParams();
+  document.getElementById("saveParams")?.addEventListener("click", () => { saveParams(true); calculate(); renderCompare(); });
+  document.getElementById("resetParams")?.addEventListener("click", () => { resetParams(); calculate(); renderCompare(); });
+  document.addEventListener("input", e => {
+    if(e.target.closest("#machineParamsBody")){
+      clearTimeout(window.__kkParamTimer);
+      window.__kkParamTimer=setTimeout(()=>{ saveParams(false); calculate(); renderCompare(); },80);
+    }
   });
 
   window.KK_DEFAULT_MACHINE_PARAMS = DEFAULT_PARAMS;
