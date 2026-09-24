@@ -98,20 +98,6 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
 </div>
 
 <h2 style="margin-top:18px">2. Wybierz ciąg produkcyjny</h2>
-<div class="row" style="margin-bottom:12px">
-<div class="field"><label>Gotowy ciąg produkcyjny</label>
-<select id="productionSequence">
-<option value="custom">Własny wybór</option>
-<option value="chinczyk+sztanca+wielopunkt">Chińczyk + Sztanca + Sklejarka wielopunkt</option>
-<option value="sztanca+wielopunkt">Sztanca + Sklejarka wielopunkt</option>
-<option value="chinczyk+sztanca">Chińczyk + Sztanca</option>
-<option value="emba">EMBA</option>
-<option value="chinczyk+jednopunkt">Chińczyk + Sklejarka jednopunktowa</option>
-<option value="chinczyk+emba">Chińczyk + EMBA</option>
-<option value="krajarka">Krajarka</option>
-</select></div>
-<div class="field"><label>Akcja</label><button type="button" class="primary" id="applyProductionSequence">Zastosuj ciąg</button></div>
-</div>
 <div class="checkgrid" id="machineChecks"></div>
 <div class="note">Możesz łączyć maszyny w dowolnej kolejności. Kalkulator liczy każdy etap osobno i podaje sumę.</div>
 <div class="actions"><button class="primary" onclick="calculate()">Przelicz</button><button class="secondary" onclick="saveResult()">Zapisz kalkulację</button></div>
@@ -188,12 +174,6 @@ const PRODUCTION_SEQUENCES={
  'chinczyk+emba':['chinczyk','emba'],
  'krajarka':['krajarka']
 };
-function applyProductionSequence(){
- const key=document.getElementById('productionSequence')?.value;
- if(!key || key==='custom') return;
- const ids=PRODUCTION_SEQUENCES[key]||[];
- selected.clear(); ids.forEach(id=>selected.add(id)); initChecks(); calculate();
-}
 
 function stageResult(m){
  const qty=num('qty'), uses=Math.max(1,num('uses'));
@@ -224,7 +204,6 @@ function calculate(){
 function preset(ids){
  selected.clear();ids.forEach(id=>selected.add(id));initChecks();calculate();
  const seq=Object.entries(PRODUCTION_SEQUENCES).find(([,v])=>JSON.stringify(v)===JSON.stringify(ids));
- const sel=document.getElementById('productionSequence'); if(sel) sel.value=seq?seq[0]:'custom';
 }
 
 const SEVEN_COMBOS = [
@@ -438,8 +417,6 @@ initChecks();calculate();boxCalc();renderHistory();
     renderParams();
     document.getElementById("saveParams")?.addEventListener("click", () => saveParams(true));
     document.getElementById("resetParams")?.addEventListener("click", resetParams);
-    document.getElementById("applyProductionSequence")?.addEventListener("click", applyProductionSequence);
-    document.getElementById("productionSequence")?.addEventListener("change", applyProductionSequence);
     document.addEventListener("input", e => {
       if(e.target.closest("#machineParamsBody")){
         clearTimeout(window.__kkParamTimer);
@@ -475,8 +452,11 @@ window.KK_CALC=function(name,qty,uses){
  const x=p(name); if(!x)return null;
  qty=Math.max(0,n(qty)); uses=Math.max(1,n(uses)||1);
  const effectiveQty = name === "Sztanca" ? qty / Math.max(1, uses) : qty;
- const time=effectiveQty/Math.max(.000001,n(x.divisor)||1)+(n(x.offset));
- const energy=Math.max(0,time)*n(x.energyRate);
+ const productionTime=effectiveQty/Math.max(.000001,n(x.divisor)||1);
+ const startup=n(x.offset);
+ const time=productionTime+startup;
+ // Rozruch jest dodatkowym kosztem energii: 1 h = 60 zł, 2 h = 120 zł.
+ const energy=Math.max(0,productionTime)*n(x.energyRate) + Math.max(0,startup)*60;
  const labor=time*n(x.hourCost||40)*n(x.workers);
  const total=labor+energy;
  return {name,time,energy,labor,total,unit:qty?total/qty:0};
@@ -486,60 +466,6 @@ window.KK_COMBO=function(names,qty,uses){
  return {names,rows,time:rows.reduce((a,r)=>a+r.time,0),total:rows.reduce((a,r)=>a+r.total,0),
  unit:qty?rows.reduce((a,r)=>a+r.total,0)/qty:0};
 };
-function vals(){
- let qty=500,uses=1;
- for(const e of document.querySelectorAll("input,select")){
-  const s=((e.id||"")+" "+(e.name||"")+" "+(e.placeholder||"")).toLowerCase();
-  if(/ilość|ilosc|quantity/.test(s)&&n(e.value)>0)qty=n(e.value);
-  if(/użyt|uzyt|uses/.test(s)&&n(e.value)>0)uses=n(e.value);
- }
- return {qty,uses};
-}
-function f(x,d){return n(x).toLocaleString("pl-PL",{minimumFractionDigits:d,maximumFractionDigits:d})}
-function render(){
- const b=document.getElementById("allCombosBody"); if(!b)return;
- const {qty,uses}=vals(), a=[];
- for(let m=1;m<(1<<N.length);m++){
-  const s=[];for(let i=0;i<N.length;i++)if(m&(1<<i))s.push(N[i]);
-  a.push(window.KK_COMBO(s,qty,uses));
- }
- a.length=0;
-  [
-    ["Chińczyk","Sztanca","Sklejarka wielopunkt"],
-    ["Sztanca","Sklejarka wielopunkt"],
-    ["Chińczyk","Sztanca"],
-    ["EMBA"],
-    ["Chińczyk","Sklejarka jednopunkt"],
-    ["Chińczyk","EMBA"],
-    ["Krajarka"]
-  ].forEach(s=>a.push(window.KK_COMBO(s,qty,uses)));
-  a.sort((x,y)=>x.total-y.total);
- b.innerHTML=a.map(x=>`<tr><td><strong>${x.names.join(" + ")}</strong></td><td>${f(x.time,2)} h</td><td>${f(x.total,2)} zł</td><td>${f(x.unit,4)} zł</td></tr>`).join("");
-}
-function ensureTable(){
- if(document.getElementById("allCombosBody"))return;
- const c=document.createElement("section");c.className="card";c.id="all-combos-card";
- c.innerHTML='<div class="section-head"><div><h2>Wszystkie kombinacje</h2><p class="muted">Automatycznie przeliczane z aktualnych parametrów.</p></div></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Kombinacja</th><th>Czas łączny</th><th>Koszt łączny</th><th>Koszt / szt.</th></tr></thead><tbody id="allCombosBody"></tbody></table></div>';
- (document.getElementById("params-card")||document.querySelector("main")||document.body).insertAdjacentElement("afterend",c);
-}
-function refresh(){ensureTable();render();}
-document.addEventListener("DOMContentLoaded",refresh);
-window.addEventListener("kkParamsChanged",refresh);
-document.addEventListener("input",e=>{
- if(e.target.closest("#machineParamsBody")){
-  clearTimeout(window.__kkLive);
-  window.__kkLive=setTimeout(()=>{
-   if(typeof window.KK_SAVE_PARAMS==="function")window.KK_SAVE_PARAMS(false);
-   refresh();
-  },100);
- }
-});
-document.addEventListener("change",e=>{
- if(e.target.closest("#machineParamsBody")){
-  if(typeof window.KK_SAVE_PARAMS==="function")window.KK_SAVE_PARAMS(false);
-  refresh();
- } else refresh();
-});
 })();
 </script>
 
