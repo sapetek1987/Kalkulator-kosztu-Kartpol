@@ -228,13 +228,13 @@ function preset(ids){
 }
 
 const SEVEN_COMBOS = [
-  {name:"Chińczyk + sztanca + wielopunkt", items:["chinczyk","sztanca","wielopunkt"]},
-  {name:"Sztanca + wielopunkt", items:["sztanca","wielopunkt"]},
-  {name:"Chińczyk + sztanca", items:["chinczyk","sztanca"]},
-  {name:"EMBA", items:["emba"]},
-  {name:"Chińczyk + sklejarka jednopunktowa", items:["chinczyk","jednopunkt"]},
-  {name:"Chińczyk + EMBA", items:["chinczyk","emba"]},
-  {name:"Krajarka", items:["krajarka"]}
+  {name:"Chińczyk + Sztanca + Sklejarka wielopunkt", machines:["chinczyk","sztanca","wielopunkt"]},
+  {name:"Sztanca + Sklejarka wielopunkt", machines:["sztanca","wielopunkt"]},
+  {name:"Chińczyk + Sztanca", machines:["chinczyk","sztanca"]},
+  {name:"EMBA", machines:["emba"]},
+  {name:"Chińczyk + Sklejarka jednopunktowa", machines:["chinczyk","jednopunkt"]},
+  {name:"Chińczyk + EMBA", machines:["chinczyk","emba"]},
+  {name:"Krajarka", machines:["krajarka"]}
 ];
 
 function comboParamMachine(id){
@@ -505,6 +505,38 @@ document.addEventListener("change",e=>{
   refresh();
  } else refresh();
 });
+})();
+</script>
+
+<div id="kkMachineParamsEditor" class="card" style="margin-top:16px;">
+<h3 style="margin:0 0 6px;">Parametry maszyn</h3>
+<p style="margin:0 0 12px;color:#64748b;">Zmieniaj parametry tutaj. Po zmianie są używane przez kalkulator i zapisują się w przeglądarce.</p>
+<div id="kkMachineParamsTable" style="overflow:auto"></div>
+<button type="button" id="kkResetMachineParams" style="margin-top:12px;padding:9px 14px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;cursor:pointer;">Przywróć domyślne</button>
+</div>
+<script>
+(function(){
+const KEY='kosztyKartpolMachineParams';
+const names={sztanca:'Sztanca',chinczyk:'Chińczyk',wielopunkt:'Sklejarka wielopunkt',jednopunkt:'Sklejarka jednopunktowa',emba:'EMBA',krajarka:'Krajarka'};
+const fields=[['divisor','Dzielnik'],['offset','Offset'],['workers','Pracownicy'],['energyBase','Energia bazowa'],['energyRate','Stawka energii'],['hourCost','Koszt roboczogodziny']];
+const fallback={sztanca:{divisor:1500,offset:1,workers:3,energyBase:1,energyRate:60,hourCost:40},chinczyk:{divisor:1500,offset:1,workers:3,energyBase:1,energyRate:60,hourCost:40},wielopunkt:{divisor:5000,offset:1.8,workers:5,energyBase:1.8,energyRate:60,hourCost:40},jednopunkt:{divisor:700,offset:1,workers:3,energyBase:1,energyRate:60,hourCost:40},emba:{divisor:1200,offset:1,workers:4,energyBase:1,energyRate:60,hourCost:40},krajarka:{divisor:3000,offset:.3,workers:2,energyBase:.5,energyRate:55,hourCost:40}};
+function base(){try{if(window.DEFAULT_PARAMS)return JSON.parse(JSON.stringify(window.DEFAULT_PARAMS))}catch(e){}return JSON.parse(JSON.stringify(fallback))}
+function read(){let p=base(),s={};try{s=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){}Object.keys(p).forEach(id=>p[id]=Object.assign({},p[id],s[id]||{}));return p}
+function apply(p){
+try{if(window.DEFAULT_PARAMS)Object.keys(p).forEach(id=>window.DEFAULT_PARAMS[id]=Object.assign(window.DEFAULT_PARAMS[id]||{},p[id]))}catch(e){}
+try{if(window.CFG&&Array.isArray(window.CFG.machines))window.CFG.machines.forEach(m=>{if(p[m.id])Object.assign(m,p[m.id])})}catch(e){}
+try{localStorage.setItem(KEY,JSON.stringify(p))}catch(e){}
+try{if(typeof window.KK_CALC==='function')window.KK_CALC()}catch(e){}
+try{if(typeof window.KK_COMBO==='function')window.KK_COMBO()}catch(e){}
+}
+function render(){
+const root=document.getElementById('kkMachineParamsTable');if(!root)return;const p=read();
+let s='<table style="width:100%;min-width:820px;border-collapse:collapse"><thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid #e2e8f0">Maszyna</th>';
+fields.forEach(f=>s+='<th style="text-align:left;padding:8px;border-bottom:1px solid #e2e8f0">'+f[1]+'</th>');s+='</tr></thead><tbody>';
+Object.keys(names).forEach(id=>{s+='<tr><td style="padding:7px;border-bottom:1px solid #f1f5f9;font-weight:600">'+names[id]+'</td>';fields.forEach(([k])=>s+='<td style="padding:7px;border-bottom:1px solid #f1f5f9"><input class="kkp" data-id="'+id+'" data-key="'+k+'" type="number" step=".01" value="'+p[id][k]+'" style="width:100px;padding:7px;border:1px solid #cbd5e1;border-radius:7px"></td>');s+='</tr>'});s+='</tbody></table>';root.innerHTML=s;
+root.querySelectorAll('.kkp').forEach(x=>x.addEventListener('change',()=>{let p=read(),v=parseFloat(x.value);if(Number.isFinite(v)){p[x.dataset.id][x.dataset.key]=v;apply(p)}}))
+}
+document.addEventListener('DOMContentLoaded',()=>{apply(read());render();document.getElementById('kkResetMachineParams')?.addEventListener('click',()=>{localStorage.removeItem(KEY);apply(base());render()})});
 })();
 </script>
 </body>
