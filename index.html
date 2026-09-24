@@ -58,7 +58,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
   <div class="section-head">
     <div>
       <h2>Parametry maszyn</h2>
-      <p class="muted">Edytuj parametry używane przez kalkulator. Zmiany są zapisywane lokalnie w przeglądarce.</p>
+      <p class="muted"><strong>Parametry są edytowalne.</strong> Zmień dowolną wartość w tabeli — kalkulator przeliczy wyniki automatycznie i zapisze zmianę w przeglądarce.</p>
     </div>
     <div class="actions">
       <button type="button" class="btn secondary" id="resetParams">Przywróć z Excela</button>
@@ -98,6 +98,20 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
 </div>
 
 <h2 style="margin-top:18px">2. Wybierz ciąg produkcyjny</h2>
+<div class="row" style="margin-bottom:12px">
+<div class="field"><label>Gotowy ciąg produkcyjny</label>
+<select id="productionSequence">
+<option value="custom">Własny wybór</option>
+<option value="chinczyk+sztanca+wielopunkt">Chińczyk + Sztanca + Sklejarka wielopunkt</option>
+<option value="sztanca+wielopunkt">Sztanca + Sklejarka wielopunkt</option>
+<option value="chinczyk+sztanca">Chińczyk + Sztanca</option>
+<option value="emba">EMBA</option>
+<option value="chinczyk+jednopunkt">Chińczyk + Sklejarka jednopunktowa</option>
+<option value="chinczyk+emba">Chińczyk + EMBA</option>
+<option value="krajarka">Krajarka</option>
+</select></div>
+<div class="field"><label>Akcja</label><button type="button" class="primary" id="applyProductionSequence">Zastosuj ciąg</button></div>
+</div>
 <div class="checkgrid" id="machineChecks"></div>
 <div class="note">Możesz łączyć maszyny w dowolnej kolejności. Kalkulator liczy każdy etap osobno i podaje sumę.</div>
 <div class="actions"><button class="primary" onclick="calculate()">Przelicz</button><button class="secondary" onclick="saveResult()">Zapisz kalkulację</button></div>
@@ -145,6 +159,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
 
 <script>
 const CFG={"machines": [{"id": "sztanca", "name": "Sztanca", "time": "=IMDIV(H3,I3)/1500+1", "workers": 3, "energy": "=(H6-1)*60", "cost": "=(H6*40)*H7+H8"}, {"id": "chinczyk", "name": "Chińczyk", "time": "=IMDIV(H3,I3)/1500+1", "workers": 3, "energy": "=(I6-1)*60", "cost": "=(I6*40)*I7+I8"}, {"id": "wielopunkt", "name": "Sklejarka wielopunkt", "time": "=H3/5000+1.8", "workers": 5, "energy": "=(J6-1.8)*60", "cost": "=(J6*40)*J7+J8"}, {"id": "jednopunkt", "name": "Sklejarka jednopunkt", "time": "=H3/700+1", "workers": 3, "energy": "=(K6-1)*60", "cost": "=(K6*40)*K7+K8"}, {"id": "emba", "name": "EMBA", "time": "=H3/1200+1", "workers": 4, "energy": "=(L6-1)*60", "cost": "=(L6*40)*L7+L8"}, {"id": "krajarka", "name": "Krajarka", "time": "=H3/3000+0.3", "workers": 2, "energy": "=(M6-0.5)*55", "cost": "=(M6*40)*M7+M8"}], "combinations": [
+{"name":"CH+SZT+WIELPUNKT","items":["chinczyk","sztanca","wielopunkt"]},
 {"name":"SZT+WIELPUNKT","items":["sztanca","wielopunkt"]},
 {"name":"CH+SZT","items":["chinczyk","sztanca"]},
 {"name":"EMBA","items":["emba"]},
@@ -164,22 +179,36 @@ function initChecks(){
  box.innerHTML=CFG.machines.map(m=>`<label class="check"><input type="checkbox" data-id="${m.id}" ${selected.has(m.id)?'checked':''}>${m.name}</label>`).join('');
  box.querySelectorAll('input').forEach(x=>x.addEventListener('change',()=>{x.checked?selected.add(x.dataset.id):selected.delete(x.dataset.id);calculate()}));
 }
+const PRODUCTION_SEQUENCES={
+ 'chinczyk+sztanca+wielopunkt':['chinczyk','sztanca','wielopunkt'],
+ 'sztanca+wielopunkt':['sztanca','wielopunkt'],
+ 'chinczyk+sztanca':['chinczyk','sztanca'],
+ 'emba':['emba'],
+ 'chinczyk+jednopunkt':['chinczyk','jednopunkt'],
+ 'chinczyk+emba':['chinczyk','emba'],
+ 'krajarka':['krajarka']
+};
+function applyProductionSequence(){
+ const key=document.getElementById('productionSequence')?.value;
+ if(!key || key==='custom') return;
+ const ids=PRODUCTION_SEQUENCES[key]||[];
+ selected.clear(); ids.forEach(id=>selected.add(id)); initChecks(); calculate();
+}
+
 function stageResult(m){
- const qty=num('qty'), uses=Math.max(1,num('uses')), hourCost=num('hourCost');
- let time;
- if(m.id==='sztanca'||m.id==='chinczyk') time=qty/uses/1500+1;
- if(m.id==='wielopunkt') time=qty/5000+1.8;
- if(m.id==='jednopunkt') time=qty/700+1;
- if(m.id==='emba') time=qty/1200+1;
- if(m.id==='krajarka') time=qty/3000+.3;
- let energy;
- if(m.id==='sztanca'||m.id==='chinczyk') energy=(time-1)*60;
- if(m.id==='wielopunkt') energy=(time-1.8)*60;
- if(m.id==='jednopunkt') energy=(time-1)*60;
- if(m.id==='emba') energy=(time-1)*60;
- if(m.id==='krajarka') energy=(time-.5)*55;
- const labor=time*hourCost*m.workers;
- return {time,energy,labor,total:labor+energy,unit:(labor+energy)/Math.max(1,qty)};
+ const qty=num('qty'), uses=Math.max(1,num('uses'));
+ const p=window.getKKMachineParams ? window.getKKMachineParams(m.name) : null;
+ const divisor=p?.divisor ?? ({sztanca:1500,chinczyk:1500,wielopunkt:5000,jednopunkt:700,emba:1200,krajarka:3000}[m.id]);
+ const offset=p?.offset ?? ({sztanca:1,chinczyk:1,wielopunkt:1.8,jednopunkt:1,emba:1,krajarka:.3}[m.id]);
+ const workers=p?.workers ?? m.workers;
+ const energyBase=p?.energyBase ?? ({sztanca:1,chinczyk:1,wielopunkt:1.8,jednopunkt:1,emba:1,krajarka:.5}[m.id]);
+ const energyRate=p?.energyRate ?? ({sztanca:60,chinczyk:60,wielopunkt:60,jednopunkt:60,emba:60,krajarka:55}[m.id]);
+ const hourCost=p?.hourCost ?? num('hourCost') || 40;
+ const time=qty/uses/Math.max(.000001,Number(divisor)||1)+Number(offset||0);
+ const energy=(time-Number(energyBase||0))*Number(energyRate||0);
+ const labor=time*Number(hourCost||0)*Number(workers||0);
+ const total=labor+energy;
+ return {time,energy,labor,total,unit:total/Math.max(1,qty)};
 }
 function calculate(){
  let rows=[...selected].map(id=>({m:M[id],r:stageResult(M[id])}));
@@ -194,6 +223,8 @@ function calculate(){
 }
 function preset(ids){
  selected.clear();ids.forEach(id=>selected.add(id));initChecks();calculate();
+ const seq=Object.entries(PRODUCTION_SEQUENCES).find(([,v])=>JSON.stringify(v)===JSON.stringify(ids));
+ const sel=document.getElementById('productionSequence'); if(sel) sel.value=seq?seq[0]:'custom';
 }
 
 const SEVEN_COMBOS = [
@@ -373,6 +404,14 @@ initChecks();calculate();boxCalc();renderHistory();
     renderParams();
     document.getElementById("saveParams")?.addEventListener("click", () => saveParams(true));
     document.getElementById("resetParams")?.addEventListener("click", resetParams);
+    document.getElementById("applyProductionSequence")?.addEventListener("click", applyProductionSequence);
+    document.getElementById("productionSequence")?.addEventListener("change", applyProductionSequence);
+    document.addEventListener("input", e => {
+      if(e.target.closest("#machineParamsBody")){
+        clearTimeout(window.__kkParamTimer);
+        window.__kkParamTimer=setTimeout(()=>{ saveParams(false); calculate(); renderCompare(); },120);
+      }
+    });
   });
 
   window.KK_DEFAULT_MACHINE_PARAMS = DEFAULT_PARAMS;
