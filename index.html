@@ -176,29 +176,39 @@ const PRODUCTION_SEQUENCES={
 };
 
 function stageResult(m){
- const qty=num('qty'), uses=Math.max(1,num('uses'));
+ const qty=Math.max(0,num('qty'));
+ const uses=Math.max(1,num('uses')||1);
  const p=window.getKKMachineParams ? window.getKKMachineParams(m.name) : null;
- const divisor=p?.divisor ?? ({sztanca:1500,chinczyk:1500,wielopunkt:5000,jednopunkt:700,emba:1200,krajarka:3000}[m.id]);
- const offset=p?.offset ?? ({sztanca:1,chinczyk:1,wielopunkt:1,jednopunkt:1,emba:1,krajarka:1}[m.id]);
- const workers=p?.workers ?? m.workers;
- const energyRate=p?.energyRate ?? ({sztanca:60,chinczyk:60,wielopunkt:60,jednopunkt:60,emba:60,krajarka:55}[m.id]);
- const hourCost=p?.hourCost ?? (num('hourCost') || 40);
- const effectiveQty = m.id === "sztanca" ? qty / Math.max(1, uses) : qty;
- const time=effectiveQty/Math.max(.000001,Number(divisor)||1)+(Number(offset||0));
- const energy=Math.max(0,time)*Number(energyRate||0);
- const labor=time*Number(hourCost||0)*Number(workers||0);
- const total=labor+energy;
- return {time,energy,labor,total,unit:total/Math.max(1,qty)};
+ const divisor=Number(p?.divisor ?? ({sztanca:1500,chinczyk:1500,wielopunkt:5000,jednopunkt:700,emba:1200,krajarka:3000}[m.id])) || 1;
+ const startup=Math.max(0,Number(p?.offset ?? 1));
+ const workers=Math.max(0,Number(p?.workers ?? m.workers) || 0);
+ const energyRate=Math.max(0,Number(p?.energyRate ?? ({sztanca:60,chinczyk:60,wielopunkt:60,jednopunkt:60,emba:60,krajarka:55}[m.id])) || 0);
+ const hourCost=Math.max(0,Number(p?.hourCost ?? (num('hourCost') || 40)) || 0);
+ const effectiveQty=m.id === 'sztanca' ? qty/uses : qty;
+ const productionTime=effectiveQty/divisor;
+ const time=productionTime+startup;
+ // Prąd: czas produkcji wg stawki maszyny + rozruch: 60 zł za każdą godzinę rozruchu.
+ const energy=productionTime*energyRate+startup*60;
+ const labor=time*hourCost*workers;
+ const total=energy+labor;
+ return {time,productionTime,startup,energy,labor,total,workers,unit:total/Math.max(1,qty)};
 }
 function calculate(){
- let rows=[...selected].map(id=>({m:M[id],r:stageResult(M[id])}));
- let t=rows.reduce((a,x)=>a+x.r.time,0), l=rows.reduce((a,x)=>a+x.r.labor,0), e=rows.reduce((a,x)=>a+x.r.energy,0), total=l+e, qty=num('qty');
+ const rows=[...selected].map(id=>({m:M[id],r:stageResult(M[id])})).filter(x=>x.m);
+ const qty=Math.max(0,num('qty'));
+ const t=rows.reduce((a,x)=>a+x.r.time,0);
+ const l=rows.reduce((a,x)=>a+x.r.labor,0);
+ const e=rows.reduce((a,x)=>a+x.r.energy,0);
+ // Suma końcowa zawsze jest sumą kosztów wszystkich etapów — bez ponownego przeliczania.
+ const total=rows.reduce((a,x)=>a+x.r.total,0);
  document.getElementById('totTime').textContent=t.toFixed(2).replace('.',',')+' h';
  document.getElementById('stageCount').textContent=rows.length;
- document.getElementById('labor').textContent=money(l);document.getElementById('energy').textContent=money(e);
- document.getElementById('total').textContent=money(total);document.getElementById('unit').textContent=money(total/Math.max(1,qty));
- document.getElementById('stageTable').innerHTML='<table><tr><th>Etap</th><th>Czas</th><th>Pracownicy</th><th>Energia</th><th>Koszt</th><th>/ szt.</th></tr>'+
- rows.map(x=>`<tr><td><b>${x.m.name}</b></td><td>${x.r.time.toFixed(2)} h</td><td>${(window.getKKMachineParams?.(x.m.name)?.workers ?? x.m.workers)}</td><td>${money(x.r.energy)}</td><td>${money(x.r.total)}</td><td>${money(x.r.unit)}</td></tr>`).join('')+'</table>';
+ document.getElementById('labor').textContent=money(l);
+ document.getElementById('energy').textContent=money(e);
+ document.getElementById('total').textContent=money(total);
+ document.getElementById('unit').textContent=money(total/Math.max(1,qty));
+ document.getElementById('stageTable').innerHTML='<table><tr><th>Etap</th><th>Czas</th><th>Pracownicy</th><th>Energia</th><th>Ludzie</th><th>Koszt</th><th>/ szt.</th></tr>'+\
+ rows.map(x=>`<tr><td><b>${x.m.name}</b></td><td>${x.r.time.toFixed(2)} h</td><td>${x.r.workers}</td><td>${money(x.r.energy)}</td><td>${money(x.r.labor)}</td><td>${money(x.r.total)}</td><td>${money(x.r.unit)}</td></tr>`).join('')+'</table>';
  return {time:t,labor:l,energy:e,total,unit:total/Math.max(1,qty),rows};
 }
 function preset(ids){
