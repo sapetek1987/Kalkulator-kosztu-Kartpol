@@ -127,17 +127,65 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
 </section>
 
 <section id="box" class="tab">
-<div class="grid">
-<div class="card"><h2>Specyfikacja opakowania</h2>
-<div class="field"><label>Gramatura [g/m²]</label><input id="gsm" type="number" value="445" step=".1"></div>
-<div class="row"><div class="field"><label>L [m]</label><input id="bl" type="number" value=".40" step=".001"></div><div class="field"><label>W [m]</label><input id="bw" type="number" value=".22" step=".001"></div></div>
-<div class="field"><label>H [m]</label><input id="bh" type="number" value=".14" step=".001"></div>
-<button class="primary" onclick="boxCalc()">Oblicz</button></div>
-<div class="card"><h2>Wynik</h2><div class="metrics">
-<div class="metric total"><small>Powierzchnia pudła</small><b id="boxArea">0,0000 m²</b></div>
-<div class="metric total"><small>Waga pudła</small><b id="boxWeight">0,000 kg</b></div>
-</div><div class="note">Wzór powierzchni został odwzorowany z arkusza: 2×(L×W + W×H + L×H). Waga = powierzchnia × gramatura / 1000.</div></div>
-</div>
+  <div class="grid">
+
+    <div class="card">
+      <h2>Specyfikacja opakowania</h2>
+
+      <img
+        src="karton.jpeg"
+        alt="Schemat kartonu – L długość, W szerokość, H wysokość"
+        class="box-image"
+      >
+
+      <div class="field">
+        <label>Gramatura [g/m²]</label>
+        <input id="gsm" type="number" value="445" step=".1">
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label>L [m] – długość</label>
+          <input id="bl" type="number" value=".40" step=".001">
+        </div>
+
+        <div class="field">
+          <label>W [m] – szerokość</label>
+          <input id="bw" type="number" value=".22" step=".001">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>H [m] – wysokość</label>
+        <input id="bh" type="number" value=".14" step=".001">
+      </div>
+
+      <button class="primary" onclick="boxCalc()">Oblicz</button>
+    </div>
+
+    <div class="card">
+      <h2>Wynik</h2>
+
+      <div class="metrics">
+        <div class="metric total">
+          <small>Powierzchnia pudła</small>
+          <b id="boxArea">0,0000 m²</b>
+        </div>
+
+        <div class="metric total">
+          <small>Waga pudła</small>
+          <b id="boxWeight">0,000 kg</b>
+        </div>
+      </div>
+
+      <div class="note">
+        Wzór powierzchni został odwzorowany z arkusza:
+        2×(L×W + W×H + L×H).
+        Waga = powierzchnia × gramatura / 1000.
+      </div>
+    </div>
+
+  </div>
 </section>
 
 <section id="history" class="tab"><div class="card"><h2>Historia kalkulacji</h2><div id="hist"></div></div></section>
