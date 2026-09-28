@@ -104,7 +104,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
 <div class="field"><label>Ilość [szt.]</label><input id="qty" type="number" value="30000" min="1"></div>
 </div>
 <div class="row">
-<div class="field"><label>Użytki — tylko Sztanca</label><input id="uses" type="number" value="1" min="1"></div>
+<div class="field"><label>Użytki — Sztanca i Chińczyk</label><input id="uses" type="number" value="1" min="1"></div>
 <div class="field"><label>Koszt roboczogodziny [zł]</label><input id="hourCost" type="number" value="40" step=".01"></div>
 </div>
 
@@ -243,7 +243,7 @@ function stageResult(m){
  const workers=Math.max(0,Number(p?.workers ?? m.workers) || 0);
  const energyRate=Math.max(0,Number(p?.energyRate ?? ({sztanca:60,chinczyk:60,wielopunkt:60,jednopunkt:60,emba:60,krajarka:55}[m.id])) || 0);
  const hourCost=Math.max(0,Number(p?.hourCost ?? (num('hourCost') || 40)) || 0);
- const effectiveQty=m.id === 'sztanca' ? qty/uses : qty;
+ const effectiveQty=(m.id === 'sztanca' || m.id === 'chinczyk') ? qty/uses : qty;
  const productionTime=effectiveQty/divisor;
  const time=productionTime+startup;
  // Prąd: czas produkcji wg stawki maszyny + rozruch: 60 zł za każdą godzinę rozruchu.
@@ -369,9 +369,10 @@ function boxCalc(){const L=num('bl'),W=num('bw'),H=num('bh'),gsm=num('gsm');cons
 function saveResult(){
   const r=calculate(), h=JSON.parse(localStorage.getItem('koszty_kartpol_history')||'[]');
   const qty=num('qty');
+  const uses=Math.max(1,num('uses')||1);
   const machines=[...selected].map(id=>M[id].name);
   const rows=machines.map(name=>{
-    const x=window.KK_CALC?window.KK_CALC(name,qty,1):null;
+    const x=window.KK_CALC?window.KK_CALC(name,qty,uses):null;
     const p=window.getKKMachineParams?window.getKKMachineParams(name):{};
     return x?{name:x.name,time:x.time,energy:x.energy,labor:x.labor,total:x.total,workers:Number(p?.workers||0)}:null;
   }).filter(Boolean);
@@ -533,7 +534,7 @@ function p(name){return window.KK_MACHINE_PARAMS?.[name]||window.KK_DEFAULT_MACH
 window.KK_CALC=function(name,qty,uses){
  const x=p(name); if(!x)return null;
  qty=Math.max(0,n(qty)); uses=Math.max(1,n(uses)||1);
- const effectiveQty = name === "Sztanca" ? qty / Math.max(1, uses) : qty;
+ const effectiveQty = (name === "Sztanca" || name === "Chińczyk") ? qty / Math.max(1, uses) : qty;
  const productionTime=effectiveQty/Math.max(.000001,n(x.divisor)||1);
  const startup=n(x.offset);
  const time=productionTime+startup;
