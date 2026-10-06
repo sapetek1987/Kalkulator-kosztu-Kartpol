@@ -108,8 +108,8 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
 <div class="field"><label>Koszt roboczogodziny [zł]</label><input id="hourCost" type="number" value="40" step=".01"></div>
 </div>
 <div class="row">
-<div class="field"><label>Liczba osób — Klejenie ręczne</label><input id="glueWorkers" type="number" value="2" min="1" step="1"></div>
-<div class="note" style="margin:0;display:flex;align-items:center">Klejenie ręczne: 150 szt./h na 1 osobę. Więcej osób zwiększa wydajność.</div>
+<div class="field"><label>Liczba pracowników — Klejenie ręczne</label><input id="glueWorkers" type="number" value="2" min="1" step="1"></div>
+<div class="note" style="margin:0;display:flex;align-items:center">Klejenie ręczne: 75 szt./h przy 2 osobach. Liczba pracowników jest ustawiana osobno i wpływa na czas pracy.</div>
 </div>
 
 <h2 style="margin-top:18px">2. Wybierz ciąg produkcyjny</h2>
@@ -207,7 +207,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
 </main>
 
 <script>
-const CFG={"machines": [{"id": "sztanca", "name": "Sztanca", "time": "=IMDIV(H3,I3)/1500+1", "workers": 3, "energy": "=(H6-1)*60", "cost": "=(H6*40)*H7+H8"}, {"id": "chinczyk", "name": "Chińczyk", "time": "=IMDIV(H3,I3)/1500+1", "workers": 3, "energy": "=(I6-1)*60", "cost": "=(I6*40)*I7+I8"}, {"id": "wielopunkt", "name": "Sklejarka wielopunkt", "time": "=H3/5000", "workers": 5, "energy": "=(J6-1.8)*60", "cost": "=(J6*40)*J7+J8"}, {"id": "jednopunkt", "name": "Sklejarka jednopunkt", "time": "=H3/700+1", "workers": 3, "energy": "=(K6-1)*60", "cost": "=(K6*40)*K7+K8"}, {"id": "emba", "name": "EMBA", "time": "=H3/1200+1", "workers": 4, "energy": "=(L6-1)*60", "cost": "=(L6*40)*L7+L8"}, {"id": "krajarka", "name": "Krajarka", "time": "=H3/3000+0.3", "workers": 2, "energy": "=(M6-0.5)*55", "cost": "=(M6*40)*M7+M8"}, {"id": "klejenie_reczne", "name": "Klejenie ręczne", "time": "=H3/(150*H7)", "workers": 2, "energy": "=0", "cost": "=H3/(150*H7)*H7*40"}], "combinations": [
+const CFG={"machines": [{"id": "sztanca", "name": "Sztanca", "time": "=IMDIV(H3,I3)/1500+1", "workers": 3, "energy": "=(H6-1)*60", "cost": "=(H6*40)*H7+H8"}, {"id": "chinczyk", "name": "Chińczyk", "time": "=IMDIV(H3,I3)/1500+1", "workers": 3, "energy": "=(I6-1)*60", "cost": "=(I6*40)*I7+I8"}, {"id": "wielopunkt", "name": "Sklejarka wielopunkt", "time": "=H3/5000", "workers": 5, "energy": "=(J6-1.8)*60", "cost": "=(J6*40)*J7+J8"}, {"id": "jednopunkt", "name": "Sklejarka jednopunkt", "time": "=H3/700+1", "workers": 3, "energy": "=(K6-1)*60", "cost": "=(K6*40)*K7+K8"}, {"id": "emba", "name": "EMBA", "time": "=H3/1200+1", "workers": 4, "energy": "=(L6-1)*60", "cost": "=(L6*40)*L7+L8"}, {"id": "krajarka", "name": "Krajarka", "time": "=H3/3000+0.3", "workers": 2, "energy": "=(M6-0.5)*55", "cost": "=(M6*40)*M7+M8"}, {"id": "klejenie_reczne", "name": "Klejenie ręczne", "time": "=H3/(37.5*H7)", "workers": 2, "energy": "=0", "cost": "=H3/(37.5*H7)*H7*40"}], "combinations": [
 {"name":"CH+SZT+WIELPUNKT","items":["chinczyk","sztanca","wielopunkt"]},
 {"name":"SZT+WIELPUNKT","items":["sztanca","wielopunkt"]},
 {"name":"CH+SZT","items":["chinczyk","sztanca"]},
@@ -243,7 +243,7 @@ function stageResult(m){
  const qty=Math.max(0,num('qty'));
  const uses=Math.max(1,num('uses')||1);
  const p=window.getKKMachineParams ? window.getKKMachineParams(m.name) : null;
- const divisor=Number(p?.divisor ?? ({sztanca:1500,chinczyk:1500,wielopunkt:5000,jednopunkt:700,emba:1200,krajarka:3000,klejenie_reczne:150}[m.id])) || 1;
+ const divisor=Number(p?.divisor ?? ({sztanca:1500,chinczyk:1500,wielopunkt:5000,jednopunkt:700,emba:1200,krajarka:3000,klejenie_reczne:37.5}[m.id])) || 1;
  const startup = m.id === 'klejenie_reczne' ? 0 : Math.max(0,Number(p?.offset ?? 1));
  const workers = m.id === 'klejenie_reczne'
    ? Math.max(1, num('glueWorkers') || Number(p?.workers ?? m.workers) || 1)
@@ -251,7 +251,7 @@ function stageResult(m){
  const energyRate=Math.max(0,Number(p?.energyRate ?? ({sztanca:60,chinczyk:60,wielopunkt:60,jednopunkt:60,emba:60,krajarka:55,klejenie_reczne:0}[m.id])) || 0);
  const hourCost=Math.max(0,Number(p?.hourCost ?? (num('hourCost') || 40)) || 0);
  const effectiveQty=(m.id === 'sztanca' || m.id === 'chinczyk') ? qty/uses : qty;
- // Klejenie ręczne: 150 szt./h jest wydajnością JEDNEJ osoby.
+ // Klejenie ręczne: 75 szt./h przy 2 osobach, czyli 37,5 szt./h na osobę. Liczba pracowników jest pobierana z pola glueWorkers.
  // Liczba osób zwiększa wydajność, więc skraca czas proporcjonalnie.
  const productionTime = m.id === 'klejenie_reczne'
    ? effectiveQty / (divisor * Math.max(1, workers))
@@ -470,7 +470,7 @@ renderHistory();
         <td><input type="number" step="1" min="0" data-k="workers" value="${p.workers}"></td>
         <td>
           <div class="formula-box">
-            czas: ${name === "Sztanca" ? "ilość / użytki / współczynnik + Rozruch [h]" : name === "Klejenie ręczne" ? "ilość / (150 szt./h × liczba osób)" : "ilość / współczynnik + Rozruch [h]"}<br>
+            czas: ${name === "Sztanca" ? "ilość / użytki / współczynnik + Rozruch [h]" : name === "Klejenie ręczne" ? "ilość / (37,5 szt./h × liczba pracowników)" : "ilość / współczynnik + Rozruch [h]"}<br>
             energia: czas × stawka
           </div>
           <div class="energy-grid">
