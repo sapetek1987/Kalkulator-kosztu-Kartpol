@@ -4,15 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
+
 <!-- Ikona aplikacji na iPhone -->
 <link rel="apple-touch-icon" sizes="180x180" href="./logo.PNG">
 <link rel="icon" type="image/png" href="./logo.PNG">
 <link rel="shortcut icon" href="./logo.PNG">
 
+
 <!-- Tryb aplikacji iOS -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Koszty Kartpol">
+
 
 <title>Koszty Kartpol</title>
 <style>
@@ -41,6 +44,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
 @media(max-width:850px){.grid{grid-template-columns:1fr}.row,.metrics,.checkgrid{grid-template-columns:1fr}}
 </style>
 
+
 <style>
 #params-card{margin:18px 0}
 #params-card .table-wrap{overflow:auto}
@@ -54,6 +58,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
 #params-card .note{margin-top:10px;font-size:.85rem;opacity:.8}
 </style>
 
+
 </head>
 <body>
 <header><h1>Koszty Kartpol</h1><span>Kalkulator kosztów produkcji opakowań</span></header>
@@ -65,34 +70,37 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
 </nav>
 <main>
 
+
 <section class="card" id="params-card">
-  <div class="section-head">
-    <div>
-      <h2>Parametry maszyn</h2>
-      <p class="muted"><strong>Parametry są edytowalne.</strong> Zmień dowolną wartość w tabeli — kalkulator przeliczy wyniki automatycznie i zapisze zmianę w przeglądarce.</p>
-    </div>
-    <div class="actions">
-      <button type="button" class="btn secondary" id="resetParams">Przywróć z Excela</button>
-      <button type="button" class="btn" id="saveParams">Zapisz parametry</button>
-    </div>
-  </div>
-  <div class="table-wrap">
-    <table class="data-table" id="machineParamsTable">
-      <thead>
-        <tr>
-          <th>Maszyna</th>
-          <th>Wsp. ilości</th>
-          <th>Rozruch [h]</th>
-          <th>Pracownicy</th>
-          <th>Energia / wzór</th>
-          <th>Koszt roboczogodziny</th>
-        </tr>
-      </thead>
-      <tbody id="machineParamsBody"></tbody>
-    </table>
-  </div>
-  <div class="note" id="paramsStatus"></div>
+ <div class="section-head">
+ <div>
+ <h2>Parametry maszyn</h2>
+ <p class="muted"><strong>Parametry są edytowalne.</strong> Zmień dowolną wartość w tabeli — kalkulator przeliczy wyniki automatycznie i zapisze zmianę w przeglądarce.</p>
+ </div>
+ <div class="actions">
+ <button type="button" class="btn secondary" id="resetParams">Przywróć z Excela</button>
+ <button type="button" class="btn" id="saveParams">Zapisz parametry</button>
+ </div>
+ </div>
+ <div class="table-wrap">
+ <table class="data-table" id="machineParamsTable">
+ <thead>
+ <tr>
+ <th>Maszyna</th>
+ <th>Wsp. ilości</th>
+ <th>Rozruch [h]</th>
+ <th>Pracownicy</th>
+ <th>Energia / wzór</th>
+ <th>Koszt roboczogodziny</th>
+ </tr>
+ </thead>
+ <tbody id="machineParamsBody"></tbody>
+ </table>
+ </div>
+ <div class="note" id="paramsStatus"></div>
 </section>
+
+
 
 
 <section id="calc" class="tab active">
@@ -108,15 +116,17 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
 <div class="field"><label>Koszt roboczogodziny [zł]</label><input id="hourCost" type="number" value="40" step=".01"></div>
 </div>
 <div class="row">
-<div class="field"><label>Liczba pracowników — Klejenie ręczne</label><input id="glueWorkers" type="number" value="2" min="1" step="1"></div><div class="muted" style="margin-top:4px">Klejenie ręczne: 37,5 szt./h na 1 osobę (75 szt./h przy 2 osobach). Stawka: 40 zł/os./h.</div>
-<div class="note" style="margin:0;display:flex;align-items:center">Klejenie ręczne: 75 szt./h przy 2 osobach. Liczba pracowników jest ustawiana osobno i wpływa na czas pracy.</div>
+<div class="field"><label>Liczba pracowników — Klejenie ręczne</label><input id="glueWorkers" type="number" value="2" min="1" step="1"></div><div class="field"><label>Rodzaj kartonu — Klejenie ręczne</label><select id="manualBoxType"><option value="two">Karton 2-częściowy</option><option value="one">Karton 1-częściowy</option></select></div><div class="muted" style="margin-top:4px">Wydajność klejenia ręcznego zależy od rodzaju kartonu i liczby pracowników.</div>
+<div class="note" style="margin:0;display:flex;align-items:center">Wydajność na osobę: 35 szt./h (karton 2-częściowy) lub 150 szt./h (karton 1-częściowy).</div>
 </div>
+
 
 <h2 style="margin-top:18px">2. Wybierz ciąg produkcyjny</h2>
 <div class="checkgrid" id="machineChecks"></div>
 <div class="note">Możesz łączyć maszyny w dowolnej kolejności. Kalkulator liczy każdy etap osobno i podaje sumę.</div>
 <div class="actions"><button class="primary" onclick="calculate()">Przelicz</button><button class="secondary" onclick="saveResult()">Zapisz kalkulację</button></div>
 </div>
+
 
 <div class="card">
 <h2>Wynik ciągu produkcyjnego</h2>
@@ -133,6 +143,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
 </div>
 </section>
 
+
 <section id="compare" class="tab">
 <div class="card">
 <h2>Porównanie różnych modeli / kombinacji</h2>
@@ -141,70 +152,85 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
 </div>
 </section>
 
+
 <section id="box" class="tab">
-  <div class="grid">
+ <div class="grid">
 
-    <div class="card">
-      <h2>Specyfikacja opakowania</h2>
 
-      <img
-        src="./karton.jpeg.JPG"
-        alt="Schemat kartonu – L długość, W szerokość, H wysokość"
-        class="box-image"
-      >
+ <div class="card">
+ <h2>Specyfikacja opakowania</h2>
 
-      <div class="field">
-        <label>Gramatura [g/m²]</label>
-        <input id="gsm" type="number" value="445" step=".1">
-      </div>
 
-      <div class="row">
-        <div class="field">
-          <label>L [mm] – długość</label>
-          <input id="bl" type="number" value=".40" step=".001">
-        </div>
+ <img
+ src="./karton.jpeg.JPG"
+ alt="Schemat kartonu – L długość, W szerokość, H wysokość"
+ class="box-image"
+ >
 
-        <div class="field">
-          <label>W [mm] – szerokość</label>
-          <input id="bw" type="number" value=".22" step=".001">
-        </div>
-      </div>
 
-      <div class="field">
-        <label>H [mm] – wysokość</label>
-        <input id="bh" type="number" value=".14" step=".001">
-      </div>
+ <div class="field">
+ <label>Gramatura [g/m²]</label>
+ <input id="gsm" type="number" value="445" step=".1">
+ </div>
 
-      <button class="primary" onclick="boxCalc()">Oblicz</button>
-    </div>
 
-    <div class="card">
-      <h2>Wynik</h2>
+ <div class="row">
+ <div class="field">
+ <label>L [mm] – długość</label>
+ <input id="bl" type="number" value=".40" step=".001">
+ </div>
 
-      <div class="metrics">
-        <div class="metric total">
-          <small>Powierzchnia pudła</small>
-          <b id="boxArea">0,0000 m²</b>
-        </div>
 
-        <div class="metric total">
-          <small>Waga pudła</small>
-          <b id="boxWeight">0,000 kg</b>
-        </div>
-      </div>
+ <div class="field">
+ <label>W [mm] – szerokość</label>
+ <input id="bw" type="number" value=".22" step=".001">
+ </div>
+ </div>
 
-      <div class="note">
+
+ <div class="field">
+ <label>H [mm] – wysokość</label>
+ <input id="bh" type="number" value=".14" step=".001">
+ </div>
+
+
+ <button class="primary" onclick="boxCalc()">Oblicz</button>
+ </div>
+
+
+ <div class="card">
+ <h2>Wynik</h2>
+
+
+ <div class="metrics">
+ <div class="metric total">
+ <small>Powierzchnia pudła</small>
+ <b id="boxArea">0,0000 m²</b>
+ </div>
+
+
+ <div class="metric total">
+ <small>Waga pudła</small>
+ <b id="boxWeight">0,000 kg</b>
+ </div>
+ </div>
+
+
+ <div class="note">
         Wzór powierzchni został odwzorowany z arkusza:
         2×(L×W + W×H + L×H).
         Waga = powierzchnia × gramatura / 1000.
-      </div>
-    </div>
+ </div>
+ </div>
 
-  </div>
+
+ </div>
 </section>
+
 
 <section id="history" class="tab"><div class="card"><h2>Historia kalkulacji</h2><div id="hist"></div></div></section>
 </main>
+
 
 <script>
 const CFG={"machines": [{"id": "sztanca", "name": "Sztanca", "time": "=IMDIV(H3,I3)/1500+1", "workers": 3, "energy": "=(H6-1)*60", "cost": "=(H6*40)*H7+H8"}, {"id": "chinczyk", "name": "Chińczyk", "time": "=IMDIV(H3,I3)/1500+1", "workers": 3, "energy": "=(I6-1)*60", "cost": "=(I6*40)*I7+I8"}, {"id": "wielopunkt", "name": "Sklejarka wielopunkt", "time": "=H3/5000", "workers": 5, "energy": "=(J6-1.8)*60", "cost": "=(J6*40)*J7+J8"}, {"id": "jednopunkt", "name": "Sklejarka jednopunkt", "time": "=H3/700+1", "workers": 3, "energy": "=(K6-1)*60", "cost": "=(K6*40)*K7+K8"}, {"id": "emba", "name": "EMBA", "time": "=H3/1200+1", "workers": 4, "energy": "=(L6-1)*60", "cost": "=(L6*40)*L7+L8"}, {"id": "krajarka", "name": "Krajarka", "time": "=H3/3000+0.3", "workers": 2, "energy": "=(M6-0.5)*55", "cost": "=(M6*40)*M7+M8"}, {"id": "klejenie_reczne", "name": "Klejenie ręczne", "time": "=H3/(37.5*H7)", "workers": 2, "energy": "=0", "cost": "=H3/(37.5*H7)*H7*40"}], "combinations": [
@@ -218,6 +244,7 @@ const CFG={"machines": [{"id": "sztanca", "name": "Sztanca", "time": "=IMDIV(H3,
 ]};
 const M=Object.fromEntries(CFG.machines.map(x=>[x.id,x]));
 const selected=new Set(["chinczyk","sztanca","wielopunkt","klejenie_reczne"]);
+
 
 function money(x){return x.toLocaleString('pl-PL',{minimumFractionDigits:2,maximumFractionDigits:2})+" zł"}
 function num(id){return parseFloat(document.getElementById(id).value)||0}
@@ -239,11 +266,13 @@ const PRODUCTION_SEQUENCES={
  'klejenie_reczne':['klejenie_reczne']
 };
 
+
 function stageResult(m){
  const qty=Math.max(0,num('qty'));
  const uses=Math.max(1,num('uses')||1);
  const p=window.getKKMachineParams ? window.getKKMachineParams(m.name) : null;
- const divisor = m.id === 'klejenie_reczne' ? 37.5 : (Number(p?.divisor ?? ({sztanca:1500,chinczyk:1500,wielopunkt:5000,jednopunkt:700,emba:1200,krajarka:3000}[m.id])) || 1);
+ const manualRate = document.getElementById('manualBoxType')?.value === 'one' ? Number(p?.onePartRate ?? 150) : Number(p?.divisor ?? 35);
+  const divisor = m.id === 'klejenie_reczne' ? Math.max(0.000001, manualRate) : (Number(p?.divisor ?? ({sztanca:1500,chinczyk:1500,wielopunkt:5000,jednopunkt:700,emba:1200,krajarka:3000}[m.id])) || 1);
  const startup = m.id === 'klejenie_reczne' ? 0 : Math.max(0,Number(p?.offset ?? 1));
  const workers = m.id === 'klejenie_reczne'
    ? Math.max(1, num('glueWorkers') || Number(p?.workers ?? m.workers) || 1)
@@ -251,7 +280,7 @@ function stageResult(m){
  const energyRate=Math.max(0,Number(p?.energyRate ?? ({sztanca:60,chinczyk:60,wielopunkt:60,jednopunkt:60,emba:60,krajarka:55,klejenie_reczne:0}[m.id])) || 0);
  const hourCost = m.id === 'klejenie_reczne' ? 40 : Math.max(0,Number(p?.hourCost ?? (num('hourCost') || 40)) || 0);
  const effectiveQty=(m.id === 'sztanca' || m.id === 'chinczyk') ? qty/uses : qty;
- // Klejenie ręczne: 75 szt./h przy 2 osobach, czyli 37,5 szt./h na osobę. Liczba pracowników jest pobierana z pola glueWorkers.
+ // Klejenie ręczne: wydajność na osobę zależy od wybranego rodzaju kartonu.
  // Liczba osób zwiększa wydajność, więc skraca czas proporcjonalnie.
  const productionTime = m.id === 'klejenie_reczne'
    ? effectiveQty / (divisor * Math.max(1, workers))
@@ -286,35 +315,40 @@ function preset(ids){
  const seq=Object.entries(PRODUCTION_SEQUENCES).find(([,v])=>JSON.stringify(v)===JSON.stringify(ids));
 }
 
+
 const SEVEN_COMBOS = [
-  {name:"Chińczyk + Sztanca + Sklejarka wielopunkt", machines:["chinczyk","sztanca","wielopunkt"]},
-  {name:"Sztanca + Sklejarka wielopunkt", machines:["sztanca","wielopunkt"]},
-  {name:"Chińczyk + Sztanca", machines:["chinczyk","sztanca"]},
-  {name:"EMBA", machines:["emba"]},
-  {name:"Chińczyk + Sklejarka jednopunktowa", machines:["chinczyk","jednopunkt"]},
-  {name:"Chińczyk + EMBA", machines:["chinczyk","emba"]},
-  {name:"Krajarka", machines:["krajarka"]},
-  {name:"Klejenie ręczne", machines:["klejenie_reczne"]}
+ {name:"Chińczyk + Sztanca + Sklejarka wielopunkt", machines:["chinczyk","sztanca","wielopunkt"]},
+ {name:"Sztanca + Sklejarka wielopunkt", machines:["sztanca","wielopunkt"]},
+ {name:"Chińczyk + Sztanca", machines:["chinczyk","sztanca"]},
+ {name:"EMBA", machines:["emba"]},
+ {name:"Chińczyk + Sklejarka jednopunktowa", machines:["chinczyk","jednopunkt"]},
+ {name:"Chińczyk + EMBA", machines:["chinczyk","emba"]},
+ {name:"Krajarka", machines:["krajarka"]},
+ {name:"Klejenie ręczne", machines:["klejenie_reczne"]}
 ];
 
+
 function comboParamMachine(id){
-  const m=M[id];
-  return {id,name:m.name, p:window.getKKMachineParams(m.name)};
+ const m=M[id];
+ return {id,name:m.name, p:window.getKKMachineParams(m.name)};
 }
 
+
 function renderComboParams(){
-  const body=document.getElementById('comboParamsBody');
-  if(!body || !window.KK_MACHINE_PARAMS)return;
+ const body=document.getElementById('comboParamsBody');
+ if(!body || !window.KK_MACHINE_PARAMS)return;
 
-  // Parametry pokazujemy tylko raz dla każdej unikalnej maszyny.
-  const uniqueIds=[];
-  SEVEN_COMBOS.forEach(c=>c.machines.forEach(id=>{
-    if(!uniqueIds.includes(id)) uniqueIds.push(id);
-  }));
 
-  body.innerHTML=uniqueIds.map(id=>{
-    const x=comboParamMachine(id), p=x.p;
-    return `<tr>
+ // Parametry pokazujemy tylko raz dla każdej unikalnej maszyny.
+ const uniqueIds=[];
+ SEVEN_COMBOS.forEach(c=>c.machines.forEach(id=>{
+ if(!uniqueIds.includes(id)) uniqueIds.push(id);
+ }));
+
+
+ body.innerHTML=uniqueIds.map(id=>{
+ const x=comboParamMachine(id), p=x.p;
+ return `<tr>
       <td><strong>${esc(x.name)}</strong></td>
       <td><input type="number" step="0.01" min="0.01" data-machine="${esc(x.name)}" data-k="divisor" value="${p.divisor}"></td>
       <td><input type="number" step="0.01" data-machine="${esc(x.name)}" data-k="offset" value="${p.offset}"></td>
@@ -322,99 +356,107 @@ function renderComboParams(){
       <td><input type="number" step="0.01" min="0" data-machine="${esc(x.name)}" data-k="energyRate" value="${p.energyRate}"></td>
       <td><input type="number" step="0.01" min="0" data-machine="${esc(x.name)}" data-k="hourCost" value="${p.hourCost}"></td>
     </tr>`;
-  }).join('');
+ }).join('');
 }
+
 
 function syncComboParams(){
-  document.querySelectorAll('#comboParamsBody input[data-machine]').forEach(input=>{
-    const p=window.KK_MACHINE_PARAMS?.[input.dataset.machine];
-    if(!p)return;
-    const v=Number(input.value);
-    if(Number.isFinite(v))p[input.dataset.k]=v;
-  });
-  localStorage.setItem("kosztyKartpolMachineParams",JSON.stringify(window.KK_MACHINE_PARAMS));
-  renderParams();
-  window.dispatchEvent(new CustomEvent('kkParamsChanged'));
-  calculate();
-  renderCompare();
+ document.querySelectorAll('#comboParamsBody input[data-machine]').forEach(input=>{
+ const p=window.KK_MACHINE_PARAMS?.[input.dataset.machine];
+ if(!p)return;
+ const v=Number(input.value);
+ if(Number.isFinite(v))p[input.dataset.k]=v;
+ });
+ localStorage.setItem("kosztyKartpolMachineParams",JSON.stringify(window.KK_MACHINE_PARAMS));
+ renderParams();
+ window.dispatchEvent(new CustomEvent('kkParamsChanged'));
+ calculate();
+ renderCompare();
 }
+
 
 document.addEventListener('DOMContentLoaded',()=>{
-  renderComboParams();
-  document.getElementById('resetComboParams')?.addEventListener('click',()=>{
-    window.KK_MACHINE_PARAMS=JSON.parse(JSON.stringify(window.KK_DEFAULT_MACHINE_PARAMS));
-    localStorage.removeItem("kosztyKartpolMachineParams");
-    renderParams();
-    renderComboParams();
-    calculate();
-    renderCompare();
-  });
+ renderComboParams();
+ document.getElementById('resetComboParams')?.addEventListener('click',()=>{
+ window.KK_MACHINE_PARAMS=JSON.parse(JSON.stringify(window.KK_DEFAULT_MACHINE_PARAMS));
+ localStorage.removeItem("kosztyKartpolMachineParams");
+ renderParams();
+ renderComboParams();
+ calculate();
+ renderCompare();
+ });
 });
+
 
 document.addEventListener('input',e=>{
-  if(e.target.closest('#comboParamsBody')){
-    clearTimeout(window.__kkComboLive);
-    window.__kkComboLive=setTimeout(syncComboParams,100);
-  }
+ if(e.target.closest('#comboParamsBody')){
+ clearTimeout(window.__kkComboLive);
+ window.__kkComboLive=setTimeout(syncComboParams,100);
+ }
 });
+
 
 window.addEventListener('kkParamsChanged',()=>{
-  if(document.getElementById('comboParamsBody'))renderComboParams();
+ if(document.getElementById('comboParamsBody'))renderComboParams();
 });
 
+
 function renderCompare(){
-  const qty=num('qty');
-  const presets=SEVEN_COMBOS.map(p=>`<button onclick="preset(${JSON.stringify(p.items)})">${p.name}</button>`).join('');
-  document.getElementById('presetBtns').innerHTML=presets+'<button onclick="selected.clear();initChecks();calculate()">Wyczyść wybór</button>';
-  const rows=SEVEN_COMBOS.map(p=>{
-    const rr=p.items.map(id=>stageResult(M[id]));
-    const total=rr.reduce((a,x)=>a+x.total,0), time=rr.reduce((a,x)=>a+x.time,0);
-    return {name:p.name,items:p.items,time,total,unit:total/Math.max(1,qty),count:p.items.length};
-  });
-  document.getElementById('comparison').innerHTML='<table><tr><th>Kombinacja</th><th>Etapy</th><th>Czas</th><th>Koszt</th><th>Koszt / szt.</th><th></th></tr>'+
-  rows.map(x=>`<tr><td><b>${x.name}</b></td><td>${x.count}</td><td>${x.time.toFixed(2)} h</td><td>${money(x.total)}</td><td>${money(x.unit)}</td><td><button class="secondary" onclick="presetByName('${x.name.replace(/'/g,"\\'")}')">Wybierz</button></td></tr>`).join('')+'</table>';
-  renderComboParams();
+ const qty=num('qty');
+ const presets=SEVEN_COMBOS.map(p=>`<button onclick="preset(${JSON.stringify(p.items)})">${p.name}</button>`).join('');
+ document.getElementById('presetBtns').innerHTML=presets+'<button onclick="selected.clear();initChecks();calculate()">Wyczyść wybór</button>';
+ const rows=SEVEN_COMBOS.map(p=>{
+ const rr=p.items.map(id=>stageResult(M[id]));
+ const total=rr.reduce((a,x)=>a+x.total,0), time=rr.reduce((a,x)=>a+x.time,0);
+ return {name:p.name,items:p.items,time,total,unit:total/Math.max(1,qty),count:p.items.length};
+ });
+ document.getElementById('comparison').innerHTML='<table><tr><th>Kombinacja</th><th>Etapy</th><th>Czas</th><th>Koszt</th><th>Koszt / szt.</th><th></th></tr>'+
+ rows.map(x=>`<tr><td><b>${x.name}</b></td><td>${x.count}</td><td>${x.time.toFixed(2)} h</td><td>${money(x.total)}</td><td>${money(x.unit)}</td><td><button class="secondary" onclick="presetByName('${x.name.replace(/'/g,"\\'")}')">Wybierz</button></td></tr>`).join('')+'</table>';
+ renderComboParams();
 }
+
 
 function presetByName(name){const p=SEVEN_COMBOS.find(x=>x.name===name);if(p)preset(p.items);document.querySelector('nav button').click()}
 function boxCalc(){const L=num('bl'),W=num('bw'),H=num('bh'),gsm=num('gsm');const area=2*(L*W+W*H+L*H),weight=area*gsm/1000;document.getElementById('boxArea').textContent=area.toFixed(4).replace('.',',')+' m²';document.getElementById('boxWeight').textContent=weight.toFixed(3).replace('.',',')+' kg'}
 function saveResult(){
-  const r=calculate(), h=JSON.parse(localStorage.getItem('koszty_kartpol_history')||'[]');
-  const qty=num('qty');
-  const uses=Math.max(1,num('uses')||1);
-  const machines=[...selected].map(id=>M[id].name);
-  const rows=machines.map(name=>{
-    const x=window.KK_CALC?window.KK_CALC(name,qty,uses):null;
-    const p=window.getKKMachineParams?window.getKKMachineParams(name):{};
-    return x?{name:x.name,time:x.time,energy:x.energy,labor:x.labor,total:x.total,workers:Number(p?.workers||0)}:null;
-  }).filter(Boolean);
-  h.unshift({id:Date.now(),date:new Date().toLocaleString('pl-PL'),client:document.getElementById('client').value||'—',qty,machines,cost:r.total,unit:r.unit,rows});
-  localStorage.setItem('koszty_kartpol_history',JSON.stringify(h.slice(0,100)));
-  renderHistory();
-  alert('Kalkulacja została zapisana.');
+ const r=calculate(), h=JSON.parse(localStorage.getItem('koszty_kartpol_history')||'[]');
+ const qty=num('qty');
+ const uses=Math.max(1,num('uses')||1);
+ const machines=[...selected].map(id=>M[id].name);
+ const rows=machines.map(name=>{
+ const x=window.KK_CALC?window.KK_CALC(name,qty,uses):null;
+ const p=window.getKKMachineParams?window.getKKMachineParams(name):{};
+ return x?{name:x.name,time:x.time,energy:x.energy,labor:x.labor,total:x.total,workers:Number(p?.workers||0)}:null;
+ }).filter(Boolean);
+ h.unshift({id:Date.now(),date:new Date().toLocaleString('pl-PL'),client:document.getElementById('client').value||'—',qty,machines,cost:r.total,unit:r.unit,rows});
+ localStorage.setItem('koszty_kartpol_history',JSON.stringify(h.slice(0,100)));
+ renderHistory();
+ alert('Kalkulacja została zapisana.');
 }
 function printHistory(id){
-  const h=JSON.parse(localStorage.getItem('koszty_kartpol_history')||'[]');
-  const x=h.find(v=>String(v.id)===String(id)); if(!x)return;
-  const rows=(x.rows||[]).map(r=>`<tr><td>${esc(r.name)}</td><td>${r.workers}</td><td>${Number(r.time||0).toLocaleString('pl-PL',{minimumFractionDigits:2,maximumFractionDigits:2})} h</td><td>${money(r.energy||0)}</td><td>${money(r.labor||0)}</td><td>${money(r.total||0)}</td></tr>`).join('');
-  const w=window.open('','_blank','width=1000,height=800'); if(!w)return;
-  const logoData='data:image/png;base64,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';
-  w.document.write(`<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kalkulacja kosztów produkcji - ${esc(x.client||'')}</title><style>@page{size:A4;margin:14mm 14mm 16mm}*{box-sizing:border-box}html,body{margin:0;padding:0;background:#fff;color:#182230;font-family:Arial,Helvetica,sans-serif;font-size:11pt;line-height:1.35}body{padding:0}.sheet{position:relative;z-index:1;width:100%;max-width:180mm;margin:0 auto}.watermark{position:fixed;z-index:0;inset:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;pointer-events:none}.watermark img{width:86%;max-width:180mm;height:auto;opacity:.5}.head{border-bottom:2px solid #18324a;padding-bottom:10px;margin-bottom:16px}.head h1{font-size:21pt;margin:0 0 4px}.sub{color:#5b6673;font-size:10pt}.meta{display:grid;grid-template-columns:1fr 1fr;gap:7px 20px;margin:14px 0 18px}.meta div{padding:7px 0;border-bottom:1px solid #e2e6ea}.label{display:block;color:#6b7280;font-size:9pt;margin-bottom:2px}.value{font-weight:700}.flow{margin:10px 0 18px;padding:10px 12px;border:1px solid #d8dde3;border-radius:6px;background:#f7f8fa}.flow strong{display:block;margin-bottom:5px}.flow span{word-break:break-word}table{border-collapse:collapse;width:100%;margin-top:8px}th,td{border:1px solid #cfd5dc;padding:7px 8px;text-align:right}th{background:#eef1f4;text-align:center;font-weight:700}th:first-child,td:first-child{text-align:left}.summary{margin-top:18px;margin-left:auto;width:70%;border-top:2px solid #18324a;padding-top:10px}.sumrow{display:flex;justify-content:space-between;padding:4px 0}.grand{font-size:15pt;font-weight:700;padding-top:8px;margin-top:5px;border-top:1px solid #d5dbe1}.footer{margin-top:24px;padding-top:8px;border-top:1px solid #d5dbe1;color:#697586;font-size:8.5pt;display:flex;justify-content:space-between}@media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact}.no-print{display:none!important}.sheet{max-width:none}}@media screen{body{padding:20px;background:#f3f5f7}.sheet{background:#fff;padding:18mm;box-shadow:0 2px 12px rgba(0,0,0,.08)}}.no-print{margin:0 0 14px;text-align:right}.print-btn{border:0;background:#18324a;color:#fff;border-radius:6px;padding:9px 14px;font-weight:700;cursor:pointer}</style></head><body><div class="watermark" aria-hidden="true"><img src="${logoData}" alt=""></div><div class="sheet"><div class="no-print"><button class="print-btn" onclick="window.print()">🖨️ Drukuj kalkulację</button></div><header class="head"><h1>Kalkulacja kosztów produkcji</h1><div class="sub">Wydruk kalkulacji z systemu Koszty Kartpol</div></header><section class="meta"><div><span class="label">Klient</span><span class="value">${esc(x.client||'—')}</span></div><div><span class="label">Data</span><span class="value">${esc(x.date||'—')}</span></div><div><span class="label">Ilość zlecenia</span><span class="value">${Number(x.qty||0).toLocaleString('pl-PL')} szt.</span></div><div><span class="label">Koszt 1 sztuki</span><span class="value">${money(x.unit)}</span></div></section><div class="flow"><strong>Ciąg produkcyjny</strong><span>${x.machines.map(esc).join(' → ')}</span></div><table><thead><tr><th>Maszyna</th><th>Osoby</th><th>Czas</th><th>Prąd</th><th>Ludzie</th><th>Koszt etapu</th></tr></thead><tbody>${rows}</tbody></table><section class="summary"><div class="sumrow"><span>Koszt prądu</span><strong>${money((x.rows||[]).reduce((a,s)=>a+Number(s.energy||0),0))}</strong></div><div class="sumrow"><span>Koszt ludzi</span><strong>${money((x.rows||[]).reduce((a,s)=>a+Number(s.labor||0),0))}</strong></div><div class="sumrow grand"><span>Koszt całkowity</span><strong>${money(x.cost)}</strong></div><div class="sumrow"><span>Koszt 1 sztuki</span><strong>${money(x.unit)}</strong></div></section><footer class="footer"><span>Koszty Kartpol</span><span>Sporządził: DARIUSZ TOMASZEWSKI</span><span>Dokument wygenerowany: ${new Date().toLocaleString('pl-PL')}</span></footer></div><script>window.onload=()=>setTimeout(()=>window.print(),250)<\/script></body></html>`);
-  w.document.close();
+ const h=JSON.parse(localStorage.getItem('koszty_kartpol_history')||'[]');
+ const x=h.find(v=>String(v.id)===String(id)); if(!x)return;
+ const rows=(x.rows||[]).map(r=>`<tr><td>${esc(r.name)}</td><td>${r.workers}</td><td>${Number(r.time||0).toLocaleString('pl-PL',{minimumFractionDigits:2,maximumFractionDigits:2})} h</td><td>${money(r.energy||0)}</td><td>${money(r.labor||0)}</td><td>${money(r.total||0)}</td></tr>`).join('');
+ const w=window.open('','_blank','width=1000,height=800'); if(!w)return;
+ const logoData='data:image/png;base64,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';
+ w.document.write(`<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kalkulacja kosztów produkcji - ${esc(x.client||'')}</title><style>@page{size:A4;margin:14mm 14mm 16mm}*{box-sizing:border-box}html,body{margin:0;padding:0;background:#fff;color:#182230;font-family:Arial,Helvetica,sans-serif;font-size:11pt;line-height:1.35}body{padding:0}.sheet{position:relative;z-index:1;width:100%;max-width:180mm;margin:0 auto}.watermark{position:fixed;z-index:0;inset:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;pointer-events:none}.watermark img{width:86%;max-width:180mm;height:auto;opacity:.5}.head{border-bottom:2px solid #18324a;padding-bottom:10px;margin-bottom:16px}.head h1{font-size:21pt;margin:0 0 4px}.sub{color:#5b6673;font-size:10pt}.meta{display:grid;grid-template-columns:1fr 1fr;gap:7px 20px;margin:14px 0 18px}.meta div{padding:7px 0;border-bottom:1px solid #e2e6ea}.label{display:block;color:#6b7280;font-size:9pt;margin-bottom:2px}.value{font-weight:700}.flow{margin:10px 0 18px;padding:10px 12px;border:1px solid #d8dde3;border-radius:6px;background:#f7f8fa}.flow strong{display:block;margin-bottom:5px}.flow span{word-break:break-word}table{border-collapse:collapse;width:100%;margin-top:8px}th,td{border:1px solid #cfd5dc;padding:7px 8px;text-align:right}th{background:#eef1f4;text-align:center;font-weight:700}th:first-child,td:first-child{text-align:left}.summary{margin-top:18px;margin-left:auto;width:70%;border-top:2px solid #18324a;padding-top:10px}.sumrow{display:flex;justify-content:space-between;padding:4px 0}.grand{font-size:15pt;font-weight:700;padding-top:8px;margin-top:5px;border-top:1px solid #d5dbe1}.footer{margin-top:24px;padding-top:8px;border-top:1px solid #d5dbe1;color:#697586;font-size:8.5pt;display:flex;justify-content:space-between}@media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact}.no-print{display:none!important}.sheet{max-width:none}}@media screen{body{padding:20px;background:#f3f5f7}.sheet{background:#fff;padding:18mm;box-shadow:0 2px 12px rgba(0,0,0,.08)}}.no-print{margin:0 0 14px;text-align:right}.print-btn{border:0;background:#18324a;color:#fff;border-radius:6px;padding:9px 14px;font-weight:700;cursor:pointer}</style></head><body><div class="watermark" aria-hidden="true"><img src="${logoData}" alt=""></div><div class="sheet"><div class="no-print"><button class="print-btn" onclick="window.print()">🖨️ Drukuj kalkulację</button></div><header class="head"><h1>Kalkulacja kosztów produkcji</h1><div class="sub">Wydruk kalkulacji z systemu Koszty Kartpol</div></header><section class="meta"><div><span class="label">Klient</span><span class="value">${esc(x.client||'—')}</span></div><div><span class="label">Data</span><span class="value">${esc(x.date||'—')}</span></div><div><span class="label">Ilość zlecenia</span><span class="value">${Number(x.qty||0).toLocaleString('pl-PL')} szt.</span></div><div><span class="label">Koszt 1 sztuki</span><span class="value">${money(x.unit)}</span></div></section><div class="flow"><strong>Ciąg produkcyjny</strong><span>${x.machines.map(esc).join(' → ')}</span></div><table><thead><tr><th>Maszyna</th><th>Osoby</th><th>Czas</th><th>Prąd</th><th>Ludzie</th><th>Koszt etapu</th></tr></thead><tbody>${rows}</tbody></table><section class="summary"><div class="sumrow"><span>Koszt prądu</span><strong>${money((x.rows||[]).reduce((a,s)=>a+Number(s.energy||0),0))}</strong></div><div class="sumrow"><span>Koszt ludzi</span><strong>${money((x.rows||[]).reduce((a,s)=>a+Number(s.labor||0),0))}</strong></div><div class="sumrow grand"><span>Koszt całkowity</span><strong>${money(x.cost)}</strong></div><div class="sumrow"><span>Koszt 1 sztuki</span><strong>${money(x.unit)}</strong></div></section><footer class="footer"><span>Koszty Kartpol</span><span>Sporządził: DARIUSZ TOMASZEWSKI</span><span>Dokument wygenerowany: ${new Date().toLocaleString('pl-PL')}</span></footer></div><script>window.onload=()=>setTimeout(()=>window.print(),250)<\/script></body></html>`);
+ w.document.close();
 }
 function renderHistory(){
-  const h=JSON.parse(localStorage.getItem('koszty_kartpol_history')||'[]');
-  document.getElementById('hist').innerHTML=h.length?'<table><tr><th>Data</th><th>Klient</th><th>Ilość</th><th>Ciąg</th><th>Koszt</th><th>/ szt.</th><th>Akcja</th></tr>'+h.map((x,i)=>`<tr><td>${esc(x.date)}</td><td>${esc(x.client)}</td><td>${Number(x.qty||0).toLocaleString('pl-PL')}</td><td>${x.machines.map(esc).join(' → ')}</td><td>${money(x.cost)}</td><td>${money(x.unit)}</td><td><button class="secondary" type="button" onclick="printHistory('${x.id||i}')">🖨️ Drukuj kalkulację</button></td></tr>`).join('')+'</table>':'<p style="color:#667085">Brak zapisanych kalkulacji.</p>'}
+ const h=JSON.parse(localStorage.getItem('koszty_kartpol_history')||'[]');
+ document.getElementById('hist').innerHTML=h.length?'<table><tr><th>Data</th><th>Klient</th><th>Ilość</th><th>Ciąg</th><th>Koszt</th><th>/ szt.</th><th>Akcja</th></tr>'+h.map((x,i)=>`<tr><td>${esc(x.date)}</td><td>${esc(x.client)}</td><td>${Number(x.qty||0).toLocaleString('pl-PL')}</td><td>${x.machines.map(esc).join(' → ')}</td><td>${money(x.cost)}</td><td>${money(x.unit)}</td><td><button class="secondary" type="button" onclick="printHistory('${x.id||i}')">🖨️ Drukuj kalkulację</button></td></tr>`).join('')+'</table>':'<p style="color:#667085">Brak zapisanych kalkulacji.</p>'}
+
 
 function bindLiveCalculationInputs(){
-  ["qty","uses","hourCost","glueWorkers"].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el){
-      el.addEventListener("input",()=>calculate());
-      el.addEventListener("change",()=>calculate());
-    }
-  });
+ ["qty","uses","hourCost","glueWorkers","manualBoxType"].forEach(id=>{
+ const el=document.getElementById(id);
+ if(el){
+ el.addEventListener("input",()=>calculate());
+ el.addEventListener("change",()=>calculate());
+ }
+ });
 }
+
 
 initChecks();
 bindLiveCalculationInputs();
@@ -423,46 +465,51 @@ boxCalc();
 renderHistory();
 </script>
 
+
 <script>
 (function(){
-  const DEFAULT_PARAMS = {
-    "Sztanca": {divisor:1500, offset:1, workers:3, energyRate:60, hourCost:40},
-    "Chińczyk": {divisor:1500, offset:1, workers:3, energyRate:60, hourCost:40},
-    "Sklejarka wielopunkt": {divisor:5000, offset:1, workers:5, energyRate:60, hourCost:40},
-    "Sklejarka jednopunkt": {divisor:700, offset:1, workers:3, energyRate:60, hourCost:40},
-    "EMBA": {divisor:1200, offset:1, workers:4, energyRate:60, hourCost:40},
-    "Krajarka": {divisor:3000, offset:1, workers:2, energyRate:55, hourCost:40},
-    "Klejenie ręczne": {divisor:150, offset:0, workers:2, energyRate:0, hourCost:40}
-  };
+ const DEFAULT_PARAMS = {
+ "Sztanca": {divisor:1500, offset:1, workers:3, energyRate:60, hourCost:40},
+ "Chińczyk": {divisor:1500, offset:1, workers:3, energyRate:60, hourCost:40},
+ "Sklejarka wielopunkt": {divisor:5000, offset:1, workers:5, energyRate:60, hourCost:40},
+ "Sklejarka jednopunkt": {divisor:700, offset:1, workers:3, energyRate:60, hourCost:40},
+ "EMBA": {divisor:1200, offset:1, workers:4, energyRate:60, hourCost:40},
+ "Krajarka": {divisor:3000, offset:1, workers:2, energyRate:55, hourCost:40},
+ "Klejenie ręczne": {divisor:35, onePartRate:150, offset:0, workers:2, energyRate:0, hourCost:40}
+ };
 
-  function loadMachineParams(){
-    try{
-      const saved = JSON.parse(localStorage.getItem("kosztyKartpolMachineParams") || "null");
-      const clean = JSON.parse(JSON.stringify(DEFAULT_PARAMS));
-      if(saved && typeof saved === "object"){
-        Object.keys(clean).forEach(name=>{
-          if(saved[name] && typeof saved[name] === "object"){
-            clean[name] = {...clean[name], ...saved[name]};
-          }
-        });
-      }
-      return clean;
-    }catch(e){}
-    return JSON.parse(JSON.stringify(DEFAULT_PARAMS));
-  }
 
-  window.KK_MACHINE_PARAMS = loadMachineParams();
+ function loadMachineParams(){
+ try{
+ const saved = JSON.parse(localStorage.getItem("kosztyKartpolMachineParams") || "null");
+ const clean = JSON.parse(JSON.stringify(DEFAULT_PARAMS));
+ if(saved && typeof saved === "object"){
+ Object.keys(clean).forEach(name=>{
+ if(saved[name] && typeof saved[name] === "object"){
+ clean[name] = {...clean[name], ...saved[name]};
+ }
+ });
+ }
+ return clean;
+ }catch(e){}
+ return JSON.parse(JSON.stringify(DEFAULT_PARAMS));
+ }
 
-  function esc(v){
-    return String(v ?? "").replace(/[&<>"']/g, c => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-    }[c]));
-  }
 
-  function renderParams(){
-    const body = document.getElementById("machineParamsBody");
-    if(!body) return;
-    body.innerHTML = Object.entries(window.KK_MACHINE_PARAMS).map(([name,p]) => `
+ window.KK_MACHINE_PARAMS = loadMachineParams();
+
+
+ function esc(v){
+ return String(v ?? "").replace(/[&<>"']/g, c => ({
+ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+ }[c]));
+ }
+
+
+ function renderParams(){
+ const body = document.getElementById("machineParamsBody");
+ if(!body) return;
+ body.innerHTML = Object.entries(window.KK_MACHINE_PARAMS).map(([name,p]) => `
       <tr data-machine="${esc(name)}">
         <td><strong>${esc(name)}</strong></td>
         <td><input type="number" step="0.01" min="0.01" data-k="divisor" value="${p.divisor}"></td>
@@ -470,7 +517,8 @@ renderHistory();
         <td><input type="number" step="1" min="0" data-k="workers" value="${p.workers}"></td>
         <td>
           <div class="formula-box">
-            czas: ${name === "Sztanca" ? "ilość / użytki / współczynnik + Rozruch [h]" : name === "Klejenie ręczne" ? "ilość / (37,5 szt./h × liczba pracowników)" : "ilość / współczynnik + Rozruch [h]"}<br>
+            czas: ${name === "Sztanca" ? "ilość / użytki / współczynnik + Rozruch [h]" : name === "Klejenie ręczne" ? "ilość / (wydajność kartonu × liczba pracowników)" : "ilość / współczynnik + Rozruch [h]"}<br>
+            ${name === "Klejenie ręczne" ? `wydajność 1-częściowy <input type="number" step="0.01" min="0.01" data-k="onePartRate" value="${p.onePartRate ?? 150}"> szt./h/os.` : ""}<br>
             energia: czas × stawka
           </div>
           <div class="energy-grid">
@@ -480,64 +528,73 @@ renderHistory();
         <td><input type="number" step="0.01" min="0" data-k="hourCost" value="${p.hourCost}"></td>
       </tr>
     `).join("");
-  }
+ }
 
-  function readParams(){
-    document.querySelectorAll("#machineParamsBody tr").forEach(row => {
-      const name = row.dataset.machine;
-      if(!window.KK_MACHINE_PARAMS[name]) return;
-      row.querySelectorAll("input[data-k]").forEach(input => {
-        const key = input.dataset.k;
-        const value = Number(input.value);
-        if(Number.isFinite(value)) window.KK_MACHINE_PARAMS[name][key] = value;
-      });
-    });
-  }
 
-  function saveParams(show=true){
-    readParams();
-    localStorage.setItem("kosztyKartpolMachineParams", JSON.stringify(window.KK_MACHINE_PARAMS));
-    window.dispatchEvent(new CustomEvent("kkParamsChanged"));
-    const s = document.getElementById("paramsStatus");
-    if(s && show) s.textContent = "Parametry zapisane. Kalkulator będzie używał nowych wartości.";
-  }
+ function readParams(){
+ document.querySelectorAll("#machineParamsBody tr").forEach(row => {
+ const name = row.dataset.machine;
+ if(!window.KK_MACHINE_PARAMS[name]) return;
+ row.querySelectorAll("input[data-k]").forEach(input => {
+ const key = input.dataset.k;
+ const value = Number(input.value);
+ if(Number.isFinite(value)) window.KK_MACHINE_PARAMS[name][key] = value;
+ });
+ });
+ }
 
-  function resetParams(){
-    window.KK_MACHINE_PARAMS = JSON.parse(JSON.stringify(DEFAULT_PARAMS));
-    localStorage.removeItem("kosztyKartpolMachineParams");
-    renderParams();
-    window.dispatchEvent(new CustomEvent("kkParamsChanged"));
-    const s = document.getElementById("paramsStatus");
-    if(s) s.textContent = "Przywrócono parametry z arkusza Excel.";
-  }
 
-  renderParams();
-  document.getElementById("saveParams")?.addEventListener("click", () => { saveParams(true); calculate(); renderCompare(); });
-  document.getElementById("resetParams")?.addEventListener("click", () => { resetParams(); calculate(); renderCompare(); });
-  document.addEventListener("input", e => {
-    if(e.target.closest("#machineParamsBody")){
-      clearTimeout(window.__kkParamTimer);
-      window.__kkParamTimer=setTimeout(()=>{ saveParams(false); calculate(); renderCompare(); },80);
-    }
-  });
+ function saveParams(show=true){
+ readParams();
+ localStorage.setItem("kosztyKartpolMachineParams", JSON.stringify(window.KK_MACHINE_PARAMS));
+ window.dispatchEvent(new CustomEvent("kkParamsChanged"));
+ const s = document.getElementById("paramsStatus");
+ if(s && show) s.textContent = "Parametry zapisane. Kalkulator będzie używał nowych wartości.";
+ }
 
-  window.KK_DEFAULT_MACHINE_PARAMS = DEFAULT_PARAMS;
-  window.KK_SAVE_PARAMS = saveParams;
-  // Parametry muszą być gotowe przed pierwszym wynikiem głównego kalkulatora.
-  if (typeof calculate === "function") calculate();
+
+ function resetParams(){
+ window.KK_MACHINE_PARAMS = JSON.parse(JSON.stringify(DEFAULT_PARAMS));
+ localStorage.removeItem("kosztyKartpolMachineParams");
+ renderParams();
+ window.dispatchEvent(new CustomEvent("kkParamsChanged"));
+ const s = document.getElementById("paramsStatus");
+ if(s) s.textContent = "Przywrócono parametry z arkusza Excel.";
+ }
+
+
+ renderParams();
+ document.getElementById("saveParams")?.addEventListener("click", () => { saveParams(true); calculate(); renderCompare(); });
+ document.getElementById("resetParams")?.addEventListener("click", () => { resetParams(); calculate(); renderCompare(); });
+ document.addEventListener("input", e => {
+ if(e.target.closest("#machineParamsBody")){
+ clearTimeout(window.__kkParamTimer);
+ window.__kkParamTimer=setTimeout(()=>{ saveParams(false); calculate(); renderCompare(); },80);
+ }
+ });
+
+
+ window.KK_DEFAULT_MACHINE_PARAMS = DEFAULT_PARAMS;
+ window.KK_SAVE_PARAMS = saveParams;
+ // Parametry muszą być gotowe przed pierwszym wynikiem głównego kalkulatora.
+ if (typeof calculate === "function") calculate();
 })();
 </script>
+
+
 
 
 <script>
 (function(){
-  // Expose a single function for the existing calculator:
-  // get machine parameters from the editable table/localStorage.
-  window.getKKMachineParams = function(name){
-    return window.KK_MACHINE_PARAMS?.[name] || window.KK_DEFAULT_MACHINE_PARAMS?.[name];
-  };
+ // Expose a single function for the existing calculator:
+ // get machine parameters from the editable table/localStorage.
+ window.getKKMachineParams = function(name){
+ return window.KK_MACHINE_PARAMS?.[name] || window.KK_DEFAULT_MACHINE_PARAMS?.[name];
+ };
 })();
 </script>
+
+
 
 
 <script>
@@ -556,7 +613,8 @@ window.KK_CALC=function(name,qty,uses){
  const effectiveQty = (name === "Sztanca" || name === "Chińczyk") ? qty / Math.max(1, uses) : qty;
  // Przy klejeniu ręcznym wydajność 150 szt./h dotyczy jednej osoby.
  // Więcej osób zwiększa więc łączną wydajność proporcjonalnie.
- const ratePerWorker = isManual ? 37.5 : Math.max(.000001, n(x.divisor) || 1);
+ const manualRate = document.getElementById("manualBoxType")?.value === "one" ? n(x.onePartRate) : n(x.divisor);
+ const ratePerWorker = isManual ? Math.max(.000001, manualRate || (document.getElementById("manualBoxType")?.value === "one" ? 150 : 35)) : Math.max(.000001, n(x.divisor) || 1);
  const productionTime = isManual
    ? effectiveQty / (ratePerWorker * workers)
    : effectiveQty / ratePerWorker;
@@ -575,6 +633,7 @@ window.KK_COMBO=function(names,qty,uses){
 };
 })();
 </script>
+
 
 </body>
 </html>
