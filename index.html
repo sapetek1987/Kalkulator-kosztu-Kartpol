@@ -87,7 +87,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
  <thead>
  <tr>
  <th>Maszyna</th>
- <th>Wsp. ilości</th>
+ <th>Współczynnik / wydajność</th>
  <th>Rozruch [h]</th>
  <th>Pracownicy</th>
  <th>Energia / wzór</th>
@@ -512,7 +512,7 @@ renderHistory();
  body.innerHTML = Object.entries(window.KK_MACHINE_PARAMS).map(([name,p]) => `
       <tr data-machine="${esc(name)}">
         <td><strong>${esc(name)}</strong></td>
-        <td><input type="number" step="0.01" min="0.01" data-k="divisor" value="${p.divisor}"></td>
+        <td>${name === "Klejenie ręczne" ? `<div class="formula-box">wydajność 2-częściowy</div><input type="number" step="0.01" min="0.01" data-k="divisor" value="${p.divisor}"> szt./h/os.` : `<input type="number" step="0.01" min="0.01" data-k="divisor" value="${p.divisor}">`}</td>
         <td><input type="number" step="0.01" data-k="offset" value="${p.offset}"></td>
         <td><input type="number" step="1" min="0" data-k="workers" value="${p.workers}"></td>
         <td>
