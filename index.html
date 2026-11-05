@@ -87,7 +87,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
  <thead>
  <tr>
  <th>Maszyna</th>
- <th>Współczynnik / wydajność</th>
+ <th>Wsp. ilości</th>
  <th>Rozruch [h]</th>
  <th>Pracownicy</th>
  <th>Energia / wzór</th>
@@ -116,7 +116,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;bord
 <div class="field"><label>Koszt roboczogodziny [zł]</label><input id="hourCost" type="number" value="40" step=".01"></div>
 </div>
 <div class="row">
-<div class="field"><label>Liczba pracowników — Klejenie ręczne</label><input id="glueWorkers" type="number" value="2" min="1" step="1"></div><div class="field"><label>Rodzaj kartonu — Klejenie ręczne</label><select id="manualBoxType"><option value="two">Karton 2-częściowy</option><option value="one">Karton 1-częściowy</option></select></div><div class="muted" style="margin-top:4px">Zmiana rodzaju kartonu natychmiast przelicza czas i koszt: 1-częściowy = 150 szt./h/os., 2-częściowy = 35 szt./h/os.</div>
+<div class="field"><label>Liczba pracowników — Klejenie ręczne</label><input id="glueWorkers" type="number" value="2" min="1" step="1"></div><div class="field"><label>Rodzaj kartonu — Klejenie ręczne</label><select id="manualBoxType"><option value="two">Karton 2-częściowy</option><option value="one">Karton 1-częściowy</option></select></div><div class="muted" style="margin-top:4px">Wydajność klejenia ręcznego zależy od rodzaju kartonu i liczby pracowników.</div>
 <div class="note" style="margin:0;display:flex;align-items:center">Wydajność na osobę: 35 szt./h (karton 2-częściowy) lub 150 szt./h (karton 1-częściowy).</div>
 </div>
 
@@ -267,20 +267,13 @@ const PRODUCTION_SEQUENCES={
 };
 
 
-function getManualGlueSettings(){
- const typeEl=document.getElementById('manualBoxType');
- const type=typeEl && typeEl.value === 'one' ? 'one' : 'two';
- const params=window.getKKMachineParams ? window.getKKMachineParams('Klejenie ręczne') : null;
- const raw=type === 'one' ? params?.onePartRate : params?.divisor;
- const rate=Number(raw);
- return {type, rate:Number.isFinite(rate) && rate>0 ? rate : (type === 'one' ? 150 : 35)};
-}
-
 function stageResult(m){
  const qty=Math.max(0,num('qty'));
  const uses=Math.max(1,num('uses')||1);
  const p=window.getKKMachineParams ? window.getKKMachineParams(m.name) : null;
- const manualRate = m.id === 'klejenie_reczne' ? getManualGlueSettings().rate : 0;
+ const selectedBoxType = document.getElementById('manualBoxType')?.value || 'two';
+ const manualRateRaw = selectedBoxType === 'one' ? p?.onePartRate : p?.divisor;
+ const manualRate = Number(manualRateRaw) > 0 ? Number(manualRateRaw) : (selectedBoxType === 'one' ? 150 : 35);
   const divisor = m.id === 'klejenie_reczne' ? Math.max(0.000001, manualRate) : (Number(p?.divisor ?? ({sztanca:1500,chinczyk:1500,wielopunkt:5000,jednopunkt:700,emba:1200,krajarka:3000}[m.id])) || 1);
  const startup = m.id === 'klejenie_reczne' ? 0 : Math.max(0,Number(p?.offset ?? 1));
  const workers = m.id === 'klejenie_reczne'
@@ -316,7 +309,7 @@ function calculate(){
  document.getElementById('total').textContent=money(total);
  document.getElementById('unit').textContent=money(total/Math.max(1,qty));
  document.getElementById('stageTable').innerHTML='<table><tr><th>Etap</th><th>Czas</th><th>Pracownicy</th><th>Energia</th><th>Ludzie</th><th>Koszt</th><th>/ szt.</th></tr>'+
- rows.map(x=>`<tr><td><b>${x.m.name}</b>${x.m.id==='klejenie_reczne'?`<br><small>${getManualGlueSettings().type==='one'?'Karton 1-częściowy':'Karton 2-częściowy'} — ${getManualGlueSettings().rate} szt./h/os.</small>`:''}</td><td>${x.r.time.toFixed(2)} h</td><td>${x.r.workers}</td><td>${money(x.r.energy)}</td><td>${money(x.r.labor)}</td><td>${money(x.r.total)}</td><td>${money(x.r.unit)}</td></tr>`).join('')+'</table>';
+ rows.map(x=>`<tr><td><b>${x.m.name}</b></td><td>${x.r.time.toFixed(2)} h</td><td>${x.r.workers}</td><td>${money(x.r.energy)}</td><td>${money(x.r.labor)}</td><td>${money(x.r.total)}</td><td>${money(x.r.unit)}</td></tr>`).join('')+'</table>';
  return {time:t,labor:l,energy:e,total,unit:total/Math.max(1,qty),rows};
 }
 function preset(ids){
@@ -460,9 +453,8 @@ function bindLiveCalculationInputs(){
  ["qty","uses","hourCost","glueWorkers","manualBoxType"].forEach(id=>{
  const el=document.getElementById(id);
  if(el){
- const refresh=()=>{calculate(); if(id==='manualBoxType') renderCompare();};
- el.addEventListener("input",refresh);
- el.addEventListener("change",refresh);
+ el.addEventListener("input",()=>calculate());
+ el.addEventListener("change",()=>{calculate(); if(id==="manualBoxType") renderCompare();});
  }
  });
 }
@@ -522,7 +514,7 @@ renderHistory();
  body.innerHTML = Object.entries(window.KK_MACHINE_PARAMS).map(([name,p]) => `
       <tr data-machine="${esc(name)}">
         <td><strong>${esc(name)}</strong></td>
-        <td>${name === "Klejenie ręczne" ? `<div class="formula-box">wydajność 2-częściowy</div><input type="number" step="0.01" min="0.01" data-k="divisor" value="${p.divisor}"> szt./h/os.` : `<input type="number" step="0.01" min="0.01" data-k="divisor" value="${p.divisor}">`}</td>
+        <td><input type="number" step="0.01" min="0.01" data-k="divisor" value="${p.divisor}"></td>
         <td><input type="number" step="0.01" data-k="offset" value="${p.offset}"></td>
         <td><input type="number" step="1" min="0" data-k="workers" value="${p.workers}"></td>
         <td>
@@ -623,8 +615,11 @@ window.KK_CALC=function(name,qty,uses){
  const effectiveQty = (name === "Sztanca" || name === "Chińczyk") ? qty / Math.max(1, uses) : qty;
  // Przy klejeniu ręcznym wydajność 150 szt./h dotyczy jednej osoby.
  // Więcej osób zwiększa więc łączną wydajność proporcjonalnie.
- const manualSettings = isManual ? getManualGlueSettings() : null;
- const ratePerWorker = isManual ? manualSettings.rate : Math.max(.000001, n(x.divisor) || 1);
+ const selectedBoxType = document.getElementById("manualBoxType")?.value || "two";
+ const manualRateRaw = selectedBoxType === "one" ? x.onePartRate : x.divisor;
+ const manualFallback = selectedBoxType === "one" ? 150 : 35;
+ const manualRate = Number(manualRateRaw) > 0 ? Number(manualRateRaw) : manualFallback;
+ const ratePerWorker = isManual ? manualRate : Math.max(.000001, n(x.divisor) || 1);
  const productionTime = isManual
    ? effectiveQty / (ratePerWorker * workers)
    : effectiveQty / ratePerWorker;
