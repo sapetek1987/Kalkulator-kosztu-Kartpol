@@ -272,7 +272,7 @@ function stageResult(m){
  const uses=Math.max(1,num('uses')||1);
  const p=window.getKKMachineParams ? window.getKKMachineParams(m.name) : null;
  const selectedBoxType = document.getElementById('manualBoxType')?.value || 'two';
- const manualRateRaw = selectedBoxType === 'one' ? p?.onePartRate : p?.divisor;
+ const manualRateRaw = selectedBoxType === 'one' ? p?.onePartRate : (p?.twoPartRate ?? p?.divisor);
  const manualRate = Number(manualRateRaw) > 0 ? Number(manualRateRaw) : (selectedBoxType === 'one' ? 150 : 35);
   const divisor = m.id === 'klejenie_reczne' ? Math.max(0.000001, manualRate) : (Number(p?.divisor ?? ({sztanca:1500,chinczyk:1500,wielopunkt:5000,jednopunkt:700,emba:1200,krajarka:3000}[m.id])) || 1);
  const startup = m.id === 'klejenie_reczne' ? 0 : Math.max(0,Number(p?.offset ?? 1));
@@ -477,7 +477,7 @@ renderHistory();
  "Sklejarka jednopunkt": {divisor:700, offset:1, workers:3, energyRate:60, hourCost:40},
  "EMBA": {divisor:1200, offset:1, workers:4, energyRate:60, hourCost:40},
  "Krajarka": {divisor:3000, offset:1, workers:2, energyRate:55, hourCost:40},
- "Klejenie ręczne": {divisor:35, onePartRate:150, offset:0, workers:2, energyRate:0, hourCost:40}
+ "Klejenie ręczne": {divisor:35, twoPartRate:35, onePartRate:150, offset:0, workers:2, energyRate:0, hourCost:40}
  };
 
 
@@ -489,6 +489,7 @@ renderHistory();
  Object.keys(clean).forEach(name=>{
  if(saved[name] && typeof saved[name] === "object"){
  clean[name] = {...clean[name], ...saved[name]};
+ if(name === "Klejenie ręczne" && !(Number(saved[name].twoPartRate) > 0) && Number(saved[name].divisor) > 0) clean[name].twoPartRate = Number(saved[name].divisor);
  }
  });
  }
@@ -520,7 +521,7 @@ renderHistory();
         <td>
           <div class="formula-box">
             czas: ${name === "Sztanca" ? "ilość / użytki / współczynnik + Rozruch [h]" : name === "Klejenie ręczne" ? "ilość / (wydajność kartonu × liczba pracowników)" : "ilość / współczynnik + Rozruch [h]"}<br>
-            ${name === "Klejenie ręczne" ? `wydajność 1-częściowy <input type="number" step="0.01" min="0.01" data-k="onePartRate" value="${p.onePartRate ?? 150}"> szt./h/os.` : ""}<br>
+            ${name === "Klejenie ręczne" ? `wydajność 1-częściowy <input type="number" step="0.01" min="0.01" data-k="onePartRate" value="${p.onePartRate ?? 150}"> szt./h/os.<br>wydajność 2-częściowy <input type="number" step="0.01" min="0.01" data-k="twoPartRate" value="${p.twoPartRate ?? p.divisor ?? 35}"> szt./h/os.` : ""}<br>
             energia: czas × stawka
           </div>
           <div class="energy-grid">
@@ -540,7 +541,7 @@ renderHistory();
  row.querySelectorAll("input[data-k]").forEach(input => {
  const key = input.dataset.k;
  const value = Number(input.value);
- if(Number.isFinite(value)) window.KK_MACHINE_PARAMS[name][key] = value;
+ if(Number.isFinite(value)) { window.KK_MACHINE_PARAMS[name][key] = value; if(name === "Klejenie ręczne" && key === "twoPartRate") window.KK_MACHINE_PARAMS[name].divisor = value; }
  });
  });
  }
@@ -616,7 +617,7 @@ window.KK_CALC=function(name,qty,uses){
  // Przy klejeniu ręcznym wydajność 150 szt./h dotyczy jednej osoby.
  // Więcej osób zwiększa więc łączną wydajność proporcjonalnie.
  const selectedBoxType = document.getElementById("manualBoxType")?.value || "two";
- const manualRateRaw = selectedBoxType === "one" ? x.onePartRate : x.divisor;
+ const manualRateRaw = selectedBoxType === "one" ? x.onePartRate : (x.twoPartRate ?? x.divisor);
  const manualFallback = selectedBoxType === "one" ? 150 : 35;
  const manualRate = Number(manualRateRaw) > 0 ? Number(manualRateRaw) : manualFallback;
  const ratePerWorker = isManual ? manualRate : Math.max(.000001, n(x.divisor) || 1);
